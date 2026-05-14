@@ -1,0 +1,190 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int                   @id @default(autoincrement())
+  email                String                @unique
+  password             String
+  fullName             String
+  role                 String                @default("user")
+  isAdmin              Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  preferences          UserPreference?
+  profile              UserProfile?
+  verificationRequests VerificationRequest[]
+  emailVerifications   EmailVerification[]
+}
+
+model UserProfile {
+  id                         Int                 @id @default(autoincrement())
+  userId                     Int                 @unique
+  dob                        DateTime
+  location                   String?
+  city                       String?
+  country                    String?
+  latitude                   Float?
+  longitude                  Float?
+  photos                     String[]
+  interests                  String[]
+  aboutMe                    String?
+  bio                        String?
+  children                   String?
+  college                    String?
+  datingGoal                 RelationshipGoal?
+  drinking                   LifestyleFrequency?
+  drugs                      DrugFrequency?
+  ethnicity                  String?
+  exercise                   LifestyleFrequency?
+  familyPlan                 String?
+  height                     Int?
+  hometown                   String?
+  isCollegeVerified          Boolean             @default(false)
+  isPersonVerified           Boolean             @default(false)
+  isFaceVerified             Boolean             @default(false)
+  isIdVerified               Boolean             @default(false)
+  isWorkVerified             Boolean             @default(false)
+  collegeEmail               String?
+  workEmail                  String?
+  isCollegeEmailVerified     Boolean             @default(false)
+  isWorkEmailVerified        Boolean             @default(false)
+  otherAffiliationEmail      String?
+  isOtherAffiliationVerified Boolean             @default(false)
+  language                   String[]
+  pets                       String[]
+  preferredName              String?
+  prompt1Answer              String?
+  prompt1Question            PromptQuestion?
+  prompt2Answer              String?
+  prompt2Question            PromptQuestion?
+  prompt3Answer              String?
+  prompt3Question            PromptQuestion?
+  religion                   String?
+  sexuality                  String?
+  gender                     String?
+  phoneNumber                String?
+  smoking                    LifestyleFrequency?
+  work                       String?
+  user                       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationRequest {
+  id                 String    @id @default(cuid())
+  userId             Int
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName           String
+  email              String
+  selfieUrl          String
+  idCardUrl          String?
+  verificationMethod String    @default("id_document") // id_document | email
+  affiliationEmail   String?
+  status             String    @default("pending") // pending | approved | rejected
+  resolvedAt         DateTime?
+  resolvedByAdminId  Int?
+  faceVerified       Boolean   @default(false)
+  idVerified         Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([userId, status])
+}
+
+model EmailVerification {
+  id         String    @id @default(cuid())
+  userId     Int? // Nullable: null for pre-registration OTPs (no user yet)
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose    String // "registration" | "college" | "work" | "other"
+  email      String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+}
+
+model UserPreference {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @unique
+  maxDistance        Int      @default(50)
+  ageRangeMax        Int      @default(100)
+  ageRangeMin        Int      @default(18)
+  interestedInGender String[]
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum LifestyleFrequency {
+  NEVER
+  SOMETIMES
+  OFTEN
+  REGULARLY
+  PREFER_NOT_TO_SAY
+}
+
+enum DrugFrequency {
+  NEVER
+  SOMETIMES
+  OFTEN
+  PREFER_NOT_TO_SAY
+}
+
+enum RelationshipGoal {
+  LIFE_PARTNER
+  LONG_TERM
+  LONG_TERM_OPEN_TO_SHORT
+  SHORT_TERM_OPEN_TO_LONG
+  FIGURING_OUT
+  FRIENDSHIP
+  CASUAL
+  PREFER_NOT_TO_SAY
+}
+
+enum PromptQuestion {
+  TWO_TRUTHS_AND_A_LIE
+  IM_LOOKING_FOR_SOMEONE_WHO
+  THE_KEY_TO_MY_HEART_IS
+  MY_IDEAL_SUNDAY_LOOKS_LIKE
+  IM_OVERLY_COMPETITIVE_ABOUT
+  THE_BEST_WAY_TO_ASK_ME_OUT_IS
+  I_KNOW_THE_BEST_SPOT_IN_TOWN_FOR
+  MY_MOST_CONTROVERSIAL_OPINION_IS
+  IM_WEIRDLY_ATTRACTED_TO
+  DONT_HATE_ME_IF_I
+  A_SHOWER_THOUGHT_I_RECENTLY_HAD
+  MY_SIMPLE_PLEASURES
+  THE_DORKIEST_THING_ABOUT_ME_IS
+  I_WONT_SHUT_UP_ABOUT
+  MY_GO_TO_KARAOKE_SONG_IS
+  I_RECENTLY_DISCOVERED_THAT
+  TOGETHER_WE_COULD
+  IM_CONVINCED_THAT
+  MY_BIGGEST_FLEX_IS
+  GREEN_FLAGS_I_LOOK_FOR
+  DATING_ME_IS_LIKE
+  I_GEEK_OUT_ON
+  THE_WAY_TO_WIN_ME_OVER_IS
+  IM_A_REGULAR_AT
+  ILL_FALL_FOR_YOU_IF
+  MY_LOVE_LANGUAGE_IS
+  I_TAKE_PRIDE_IN
+  ALL_I_ASK_IS_THAT_YOU
+  WELL_GET_ALONG_IF
+  LETS_DEBATE_THIS_TOPIC
+  IM_KNOWN_FOR
+  MY_HIDDEN_TALENT_IS
+  YOU_SHOULD_NOT_GO_OUT_WITH_ME_IF
+  I_WANT_SOMEONE_WHO
+  TYPICAL_SUNDAY
+  I_LIKE_MY_DATES_TO_BE
+  WHAT_IM_LOOKING_FOR
+  THIS_YEAR_I_REALLY_WANT_TO
+  THE_HALLMARK_OF_A_GOOD_RELATIONSHIP_IS
+  MY_GREATEST_STRENGTH_IS
+  IM_READY_TO
+}
