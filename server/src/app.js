@@ -112,7 +112,27 @@ const upload = multer({ storage: storage });
 
 // --- Security & Middleware ---
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const cleanOrigin = origin.replace(/\/$/, "");
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ];
+    if (process.env.FRONTEND_URL) {
+      allowedOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ""));
+    }
+    
+    if (
+      allowedOrigins.includes(cleanOrigin) ||
+      /\.vercel\.app$/.test(cleanOrigin) ||
+      process.env.NODE_ENV !== 'production'
+    ) {
+      callback(null, origin);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

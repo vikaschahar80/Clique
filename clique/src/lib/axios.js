@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const isProduction = import.meta.env.PROD;
+const defaultApiUrl = isProduction ? 'https://clique-tubd.onrender.com' : '';
+
 const api = axios.create({
-  baseURL: '', // Vite proxy handles /api
+  baseURL: import.meta.env.VITE_API_URL || defaultApiUrl,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

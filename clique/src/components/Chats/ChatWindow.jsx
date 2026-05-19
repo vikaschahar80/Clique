@@ -3,7 +3,8 @@ import { Send, MoreVertical, Video, Phone, PhoneOff } from 'lucide-react';
 import api from '../../lib/axios';
 import { io } from 'socket.io-client';
 
-const ENDPOINT = "http://localhost:3000";
+const isProduction = import.meta.env.PROD;
+const ENDPOINT = import.meta.env.VITE_API_URL || (isProduction ? "https://clique-tubd.onrender.com" : "http://localhost:3000");
 let socket, selectedChatCompare;
 
 export default function ChatWindow({ selectedMatch, user }) {
