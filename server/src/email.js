@@ -66,12 +66,19 @@ export const sendRegistrationOtp = async (toEmail, code) => {
     <p>If you didn't create a Clique account, you can safely ignore this email.</p>
   `);
 
-  return getResend().emails.send({
-    from: FROM_EMAIL,
-    to: [toEmail],
-    subject: 'Verify your email — Clique',
-    html,
-  });
+  try {
+    const res = await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: [toEmail],
+      subject: 'Verify your email — Clique',
+      html,
+    });
+    console.log("📧 [Resend] Registration OTP response:", res);
+    return res;
+  } catch (err) {
+    console.error("❌ [Resend] Failed to send registration OTP:", err.message);
+    return { data: null, error: err };
+  }
 };
 
 export const sendWorkEmailOtp = async (toEmail, code) => {
@@ -86,12 +93,19 @@ export const sendWorkEmailOtp = async (toEmail, code) => {
     <p>Once verified, your profile will display a verified work badge, helping you stand out on Clique.</p>
   `);
 
-  return getResend().emails.send({
-    from: FROM_EMAIL,
-    to: [toEmail],
-    subject: 'Verify your work email — Clique',
-    html,
-  });
+  try {
+    const res = await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: [toEmail],
+      subject: 'Verify your work email — Clique',
+      html,
+    });
+    console.log("📧 [Resend] Work OTP response:", res);
+    return res;
+  } catch (err) {
+    console.error("❌ [Resend] Failed to send work OTP:", err.message);
+    return { data: null, error: err };
+  }
 };
 
 export const sendCollegeEmailOtp = async (toEmail, code) => {
@@ -106,12 +120,19 @@ export const sendCollegeEmailOtp = async (toEmail, code) => {
     <p>Once verified, your profile will display a verified student badge, helping you connect with fellow students.</p>
   `);
 
-  return getResend().emails.send({
-    from: FROM_EMAIL,
-    to: [toEmail],
-    subject: 'Verify your student email — Clique',
-    html,
-  });
+  try {
+    const res = await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: [toEmail],
+      subject: 'Verify your student email — Clique',
+      html,
+    });
+    console.log("📧 [Resend] College OTP response:", res);
+    return res;
+  } catch (err) {
+    console.error("❌ [Resend] Failed to send college OTP:", err.message);
+    return { data: null, error: err };
+  }
 };
 
 // Generic OTP sender (used for email/OTP verify endpoint — dispatches by purpose)

@@ -205,6 +205,8 @@ app.post('/api/auth/send-otp', emailLimiter, async (req, res, next) => {
       data: { userId: null, purpose: 'registration', email, codeHash, expiresAt }
     });
 
+    console.log(`🔑 [OTP Verification] Registration code for ${email} is: ${code}`);
+
     await sendRegistrationOtp(email, code);
 
     res.json({ success: true, message: 'Verification code sent to your email' });
@@ -264,6 +266,8 @@ app.post('/api/verify/email/send', verifyToken, emailLimiter, async (req, res, n
     await prisma.emailVerification.create({
       data: { userId, purpose, email, codeHash, expiresAt }
     });
+
+    console.log(`🔑 [OTP Verification] Affiliation code (${purpose}) for ${email} is: ${code}`);
 
     // Use Resend — dispatches beautiful HTML email based on purpose
     const result = await sendOtpByPurpose(email, code, purpose);
