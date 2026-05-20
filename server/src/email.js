@@ -85,8 +85,9 @@ const sendEmail = async ({ to, subject, html }) => {
   // Use Nodemailer if SMTP credentials are provided
   if (process.env.SMTP_USER && process.env.SMTP_PASS) {
     try {
+      const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER;
       const res = await getTransporter().sendMail({
-        from: `"Clique" <${process.env.SMTP_USER}>`,
+        from: `"Clique" <${fromEmail}>`,
         to,
         subject,
         html,
