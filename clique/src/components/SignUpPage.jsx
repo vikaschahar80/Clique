@@ -29,6 +29,7 @@ export function SignUpPage({ onSignUpSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [error, setError] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const navigate = useNavigate();
   const otpRefs = useRef([]);
 
@@ -65,6 +66,10 @@ export function SignUpPage({ onSignUpSuccess }) {
   const handleSendOtp = async (e) => {
     e?.preventDefault();
     setError("");
+    if (!acceptedTerms) {
+      setError("Please accept the Terms & Conditions and Privacy Policy first.");
+      return;
+    }
     if (!email || !email.includes("@")) {
       setError("Please enter a valid email address");
       return;
@@ -136,6 +141,10 @@ export function SignUpPage({ onSignUpSuccess }) {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    if (!acceptedTerms) {
+      toast.error("Please accept the Terms & Conditions and Privacy Policy first!");
+      return;
+    }
     setIsLoading(true);
     try {
       const response = await api.post("/api/auth/google", { credential: credentialResponse.credential });
@@ -216,6 +225,24 @@ export function SignUpPage({ onSignUpSuccess }) {
                       required
                     />
                   </div>
+                </div>
+
+                {/* Terms and Conditions Checkbox */}
+                <div className="flex items-start gap-2.5 py-1 text-left">
+                  <input
+                    id="accept-terms"
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="w-4.5 h-4.5 mt-0.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500/30 cursor-pointer"
+                    required
+                  />
+                  <label htmlFor="accept-terms" className="text-xs text-slate-500 leading-normal select-none cursor-pointer">
+                    I agree to the{" "}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-cyan-600 font-semibold hover:underline">Terms & Conditions</a>
+                    {" "}and{" "}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-cyan-600 font-semibold hover:underline">Privacy Policy</a>.
+                  </label>
                 </div>
 
                 <Button

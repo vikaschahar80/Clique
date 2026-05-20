@@ -197,6 +197,13 @@ export function Dashboard({ user, onSignOut }) {
                   <div className="bg-cyan-100 text-[10px] px-2 py-0.5 rounded text-cyan-700 font-bold">PRO</div>
                 </button>
               </div>
+
+              {/* Persistent Legal Links */}
+              <div className="p-3 text-center bg-slate-50 border-t border-slate-100 flex justify-center gap-4 text-xs font-semibold text-slate-400">
+                <a href="/privacy" target="_blank" rel="noreferrer" className="hover:text-blue-600 transition-colors hover:underline">Privacy Policy</a>
+                <span className="text-slate-300">•</span>
+                <a href="/terms" target="_blank" rel="noreferrer" className="hover:text-blue-600 transition-colors hover:underline">Terms of Use</a>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
