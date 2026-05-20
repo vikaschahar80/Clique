@@ -392,12 +392,22 @@ export function SignUpPage({ onSignUpSuccess }) {
           </CardContent>
         </Card>
 
-        <div className="text-center space-y-2">
-          <p className="text-xs text-slate-500">By signing up, you agree to our Terms of Service and Privacy Policy</p>
-          <div className="flex items-center justify-center gap-2 text-sm text-slate-600">
-            <Shield className="w-4 h-4 text-green-600" />
-            <span>Your data is encrypted and never shared</span>
-          </div>
+        <div className="text-center space-y-2 select-none">
+          <p className="text-xs text-slate-400">
+            By signing up, you agree to our{" "}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-cyan-600 font-semibold hover:underline">Terms of Service</a>
+            {" "}and{" "}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-cyan-600 font-semibold hover:underline">Privacy Policy</a>
+          </p>
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-cyan-600 transition-colors group w-fit mx-auto cursor-pointer"
+          >
+            <Shield className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+            <span className="group-hover:underline">Your data is encrypted and never shared</span>
+          </a>
         </div>
       </div>
     </div>
