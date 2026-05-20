@@ -3,7 +3,7 @@ import axios from 'axios';
 const isProduction = import.meta.env.PROD;
 let API_URL = import.meta.env.VITE_API_URL;
 
-if (!API_URL || API_URL.trim() === '' || API_URL === '/') {
+if (!API_URL || API_URL.trim() === '' || API_URL === '/' || API_URL.includes('.vercel.app')) {
   API_URL = isProduction ? 'https://clique-tubd.onrender.com' : '';
 }
 
