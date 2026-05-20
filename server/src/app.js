@@ -87,7 +87,16 @@ const mapRelationshipGoal = (val) => ({
   'prefer-not-to-say': 'PREFER_NOT_TO_SAY'
 }[val] || 'FIGURING_OUT');
 
-const mapPromptQuestion = (val) => val || null;
+const mapPromptQuestion = (val) => {
+  if (!val) return null;
+  const cleaned = val
+    .replace(/[']/g, '') // remove apostrophes (I'm -> IM, Don't -> DONT)
+    .replace(/[^a-zA-Z0-9\s]/g, '') // remove punctuation (commas, question marks, etc.)
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, '_'); // replace spaces with underscores
+  return cleaned || null;
+};
 
 // --- Cloudinary Config (Profile uploads) ---
 cloudinaryMain.config({
