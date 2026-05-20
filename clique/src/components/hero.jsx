@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function Hero() {
+  const navigate = useNavigate();
+
   return (
     <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <div className="max-w-7xl mx-auto">
@@ -21,7 +24,10 @@ export function Hero() {
               Connect with Clique
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:shadow-xl transition-all text-lg">
+              <button
+                onClick={() => navigate('/login')}
+                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:shadow-xl transition-all text-lg"
+              >
                 Join Clique
               </button>
               <button className="px-8 py-4 border-2 border-[#5BA3D0] text-[#5BA3D0] rounded-full hover:bg-blue-50 transition-all text-lg">
