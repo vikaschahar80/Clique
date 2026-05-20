@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Input } from "../ui/input";
-import { Shield, Camera, FileText, CheckCircle, RefreshCw, Upload, Image as ImageIcon, Mail, Loader2 } from "lucide-react";
+import { Shield, Camera, FileText, CheckCircle, RefreshCw, Upload, Image as ImageIcon, Mail, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import api from '../../lib/axios';
 
@@ -31,6 +31,29 @@ export function VerificationFlow({ onComplete }) {
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const otpRefs = useRef([]);
+
+  // Fetch live verification status from database on mount
+  const [statusLoading, setStatusLoading] = useState(true);
+  const [dbStatus, setDbStatus] = useState("none");
+  const [isVerified, setIsVerified] = useState(false);
+  const [showResubmit, setShowResubmit] = useState(false);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const response = await api.get("/api/verify/status");
+        if (response.data.success) {
+          setIsVerified(response.data.isVerified);
+          setDbStatus(response.data.status);
+        }
+      } catch (error) {
+        console.error("Error fetching verification status:", error);
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+    fetchStatus();
+  }, []);
 
   const webcamRef = useRef(null);
 
@@ -165,6 +188,96 @@ export function VerificationFlow({ onComplete }) {
     proofMode === "document"
       ? !!idCardFile
       : emailProofVerified;
+
+  if (statusLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+        <p className="text-slate-500 font-medium animate-pulse">Checking verification status...</p>
+      </div>
+    );
+  }
+
+  if (isVerified || dbStatus === 'approved') {
+    return (
+      <Card className="w-full max-w-md mx-auto text-center border-emerald-200 bg-emerald-50/50 shadow-xl overflow-hidden rounded-2xl">
+        <div className="h-2 bg-emerald-500" />
+        <CardContent className="pt-10 pb-8 space-y-6">
+          <div className="relative w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-inner border border-emerald-200">
+            <CheckCircle className="w-12 h-12 text-emerald-600" />
+            <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1.5 shadow-md border border-white">
+              <Shield className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-extrabold text-emerald-950">Identity Verified!</h2>
+            <p className="text-emerald-700 text-sm max-w-xs mx-auto leading-relaxed">
+              Your profile has been fully vetted and approved. You now enjoy a verified badge and full access to verified interactions!
+            </p>
+          </div>
+          <div className="pt-2">
+            <Button type="button" size="lg" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg rounded-xl transition-all" onClick={() => window.location.href = '/dashboard'}>
+              Go to Dashboard
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (dbStatus === 'pending') {
+    return (
+      <Card className="w-full max-w-md mx-auto text-center border-blue-200 bg-blue-50/50 shadow-xl overflow-hidden rounded-2xl">
+        <div className="h-2 bg-blue-500" />
+        <CardContent className="pt-10 pb-8 space-y-6">
+          <div className="relative w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto shadow-inner border border-blue-200">
+            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+            <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-1.5 shadow-md border border-white">
+              <Shield className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-extrabold text-blue-950">Verification Pending</h2>
+            <p className="text-blue-700 text-sm max-w-xs mx-auto leading-relaxed">
+              We have received your selfie and proof! Our team is currently reviewing it to ensure all details align. This usually takes less than 24 hours.
+            </p>
+          </div>
+          <div className="pt-2">
+            <Button type="button" variant="outline" size="lg" className="w-full border-blue-200 text-blue-700 hover:bg-blue-100/50 rounded-xl transition-all" onClick={() => window.location.href = '/dashboard'}>
+              Back to Dashboard
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (dbStatus === 'rejected' && !showResubmit) {
+    return (
+      <Card className="w-full max-w-md mx-auto text-center border-red-200 bg-red-50/50 shadow-xl overflow-hidden rounded-2xl">
+        <div className="h-2 bg-red-500" />
+        <CardContent className="pt-10 pb-8 space-y-6">
+          <div className="relative w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto shadow-inner border border-red-200">
+            <AlertCircle className="w-12 h-12 text-red-600" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-extrabold text-red-950">Verification Rejected</h2>
+            <p className="text-red-700 text-sm max-w-xs mx-auto leading-relaxed">
+              Your previous verification request was not approved. Please ensure your selfie is clear and your ID document is completely legible.
+            </p>
+          </div>
+          <div className="pt-2 space-y-2">
+            <Button type="button" size="lg" className="w-full bg-red-600 hover:bg-red-700 text-white shadow-lg rounded-xl transition-all" onClick={() => setShowResubmit(true)}>
+              Resubmit Verification
+            </Button>
+            <Button type="button" variant="outline" size="lg" className="w-full border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl transition-all" onClick={() => window.location.href = '/dashboard'}>
+              Back to Dashboard
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (step === 3) {
     return (

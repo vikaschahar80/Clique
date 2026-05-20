@@ -30,7 +30,7 @@ const cloudinaryMain = cloudinary;
 const cloudinaryVerify = Object.create(cloudinary);
 
 // --- Admin Configuration ---
-const ADMIN_EMAILS = ['vikaschahar9664@gmail.com', 'admin@clique.com']; // Add your email here
+const ADMIN_EMAILS = ['vikaschahar9664@gmail.com', 'vikaschahar9626@gmail.com', 'vikaschahar2669@gmail.com', 'admin@clique.com']; // Add your email here
 
 // --- Helpers to map Enums & Data ---
 const calculateAge = (dob) => {
@@ -1011,6 +1011,25 @@ app.post('/api/admin/verify/:userId', verifyToken, adminOnly, async (req, res, n
     });
     
     res.json({ success: true });
+  } catch (error) { next(error); }
+});
+
+app.get('/api/verify/status', verifyToken, async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.userId);
+    const profile = await prisma.userProfile.findUnique({ where: { userId } });
+    const latestRequest = await prisma.verificationRequest.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({
+      success: true,
+      isVerified: profile?.isPersonVerified || false,
+      status: latestRequest?.status || 'none', // 'pending' | 'approved' | 'rejected' | 'none'
+      createdAt: latestRequest?.createdAt || null,
+      resolvedAt: latestRequest?.resolvedAt || null,
+    });
   } catch (error) { next(error); }
 });
 
