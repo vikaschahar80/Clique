@@ -22,7 +22,8 @@ const io = new Server(server, {
       const cleanOrigin = origin.replace(/\/$/, "");
       const allowedOrigins = [
         'http://localhost:5173',
-        'http://localhost:3000'
+        'http://localhost:3000',
+        'https://clique-social.vercel.app'
       ];
       if (process.env.FRONTEND_URL) {
         allowedOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ""));
