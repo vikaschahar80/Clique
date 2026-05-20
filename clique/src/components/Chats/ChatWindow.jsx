@@ -5,7 +5,12 @@ import { io } from 'socket.io-client';
 
 const isProduction = import.meta.env.PROD;
 let ENDPOINT = import.meta.env.VITE_API_URL;
-if (!ENDPOINT || ENDPOINT.trim() === '' || ENDPOINT === '/' || ENDPOINT.includes('.vercel.app')) {
+
+const isVercel = typeof window !== 'undefined' && window.location && window.location.hostname.includes('vercel.app');
+
+if (isVercel) {
+  ENDPOINT = 'https://clique-tubd.onrender.com';
+} else if (!ENDPOINT || ENDPOINT.trim() === '' || ENDPOINT === '/' || ENDPOINT.includes('.vercel.app')) {
   ENDPOINT = isProduction ? "https://clique-tubd.onrender.com" : "http://localhost:3000";
 }
 let socket, selectedChatCompare;
