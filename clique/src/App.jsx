@@ -16,6 +16,7 @@ import { GroupDetail } from './components/Groups/GroupDetail';
 import { AdminVerification } from './components/Admin/AdminVerification';
 import { VerificationFlow } from './components/Verify/VerificationFlow';
 import { PrivacyPage } from './components/PrivacyPage';
+import { TermsPage } from './components/TermsPage';
 
 const ProtectedRoute = ({ children, requireProfileComplete = false }) => {
   const token = localStorage.getItem('authToken');
@@ -72,6 +73,18 @@ function App() {
               <Navbar />
               <main>
                 <PrivacyPage />
+              </main>
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <>
+              <Navbar />
+              <main>
+                <TermsPage />
               </main>
               <Footer />
             </>
