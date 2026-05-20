@@ -89,13 +89,7 @@ const mapRelationshipGoal = (val) => ({
 
 const mapPromptQuestion = (val) => {
   if (!val) return null;
-  const cleaned = val
-    .replace(/[']/g, '') // remove apostrophes (I'm -> IM, Don't -> DONT)
-    .replace(/[^a-zA-Z0-9\s]/g, '') // remove punctuation (commas, question marks, etc.)
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, '_'); // replace spaces with underscores
-  return cleaned || null;
+  return val.trim();
 };
 
 // --- Cloudinary Config (Profile uploads) ---
