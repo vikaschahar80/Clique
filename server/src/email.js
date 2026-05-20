@@ -1,18 +1,25 @@
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 
-// --- Nodemailer (Gmail SMTP) Config ---
+// --- Nodemailer (Generic/Elastic Email SMTP) Config ---
 let _transporter = null;
 const getTransporter = () => {
   if (!_transporter) {
+    const host = process.env.SMTP_HOST || 'smtp.elasticemail.com';
+    const port = parseInt(process.env.SMTP_PORT || '2525');
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
     if (!user || !pass) {
       throw new Error('Nodemailer SMTP_USER and SMTP_PASS are not configured in server/.env');
     }
     _transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host,
+      port,
+      secure: port === 465, // true for port 465, false for other ports
       auth: { user, pass },
+      tls: {
+        rejectUnauthorized: false // helps bypass self-signed certificate errors on some cloud environments
+      }
     });
   }
   return _transporter;
