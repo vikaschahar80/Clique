@@ -4,7 +4,10 @@ import api from '../../lib/axios';
 import { io } from 'socket.io-client';
 
 const isProduction = import.meta.env.PROD;
-const ENDPOINT = import.meta.env.VITE_API_URL || (isProduction ? "https://clique-tubd.onrender.com" : "http://localhost:3000");
+let ENDPOINT = import.meta.env.VITE_API_URL;
+if (!ENDPOINT || ENDPOINT.trim() === '' || ENDPOINT === '/') {
+  ENDPOINT = isProduction ? "https://clique-tubd.onrender.com" : "http://localhost:3000";
+}
 let socket, selectedChatCompare;
 
 export default function ChatWindow({ selectedMatch, user }) {

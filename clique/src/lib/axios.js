@@ -1,10 +1,14 @@
 import axios from 'axios';
 
 const isProduction = import.meta.env.PROD;
-const defaultApiUrl = isProduction ? 'https://clique-tubd.onrender.com' : '';
+let API_URL = import.meta.env.VITE_API_URL;
+
+if (!API_URL || API_URL.trim() === '' || API_URL === '/') {
+  API_URL = isProduction ? 'https://clique-tubd.onrender.com' : '';
+}
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || defaultApiUrl,
+  baseURL: API_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
