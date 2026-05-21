@@ -45,6 +45,12 @@ export function VerificationFlow() {
   const [idCardPreview, setIdCardPreview] = useState(null);
   const [isUploadingId, setIsUploadingId] = useState(false);
 
+  // College Verification Options State
+  const [collegeSubMethod, setCollegeSubMethod] = useState(null); // 'email' | 'id_card' | null
+  const [collegeIdFile, setCollegeIdFile] = useState(null);
+  const [collegeIdPreview, setCollegeIdPreview] = useState(null);
+  const [isUploadingCollegeId, setIsUploadingCollegeId] = useState(false);
+
   // OTP Email State
   const [emailPurpose, setEmailPurpose] = useState(""); // 'college' | 'work'
   const [affiliationEmail, setAffiliationEmail] = useState("");
@@ -147,6 +153,42 @@ export function VerificationFlow() {
       toast.error(error.response?.data?.message || "Failed to upload ID document.");
     } finally {
       setIsUploadingId(false);
+    }
+  };
+
+  const handleCollegeFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCollegeIdFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCollegeIdPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadCollegeId = async () => {
+    if (!collegeIdFile) return;
+    setIsUploadingCollegeId(true);
+    try {
+      const formData = new FormData();
+      formData.append("method", "college_id");
+      formData.append("idCard", collegeIdFile);
+
+      const response = await api.post("/api/verify/request", formData);
+      if (response.data.success) {
+        toast.success("Student ID card uploaded successfully! Admin will review shortly.");
+        setCollegeIdFile(null);
+        setCollegeIdPreview(null);
+        setCollegeSubMethod(null);
+        setActiveSection(null);
+        fetchStatus();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to upload Student ID.");
+    } finally {
+      setIsUploadingCollegeId(false);
     }
   };
 
@@ -354,19 +396,184 @@ export function VerificationFlow() {
         );
 
       case 'college':
-      case 'work':
-        const isCollege = activeSection === 'college';
         return (
           <Card className="border-0 shadow-2xl rounded-3xl bg-white overflow-hidden max-w-xl mx-auto">
             <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 sm:p-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-white/10 rounded-xl">
-                    {isCollege ? <GraduationCap className="w-6 h-6 text-white" /> : <Briefcase className="w-6 h-6 text-white" />}
+                    <GraduationCap className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl sm:text-2xl font-bold">{isCollege ? "College ID Verification" : "Work ID Verification"}</CardTitle>
-                    <CardDescription className="text-white/80 text-xs sm:text-sm">Verify your affiliation instantly using school or corporate email OTP.</CardDescription>
+                    <CardTitle className="text-xl sm:text-2xl font-bold">College Verification</CardTitle>
+                    <CardDescription className="text-white/80 text-xs sm:text-sm">Choose how you want to verify your student status.</CardDescription>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 rounded-full" onClick={() => { setActiveSection(null); setCollegeSubMethod(null); setCollegeIdFile(null); setCollegeIdPreview(null); setCodeSent(false); setAffiliationEmail(""); setOtpSlots(["","","","","",""]); }}>
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 sm:p-8 space-y-6">
+              {collegeSubMethod === null ? (
+                <div className="space-y-4">
+                  <p className="text-slate-600 text-sm">Select your preferred method to verify your college affiliation:</p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Option 1: Email OTP */}
+                    <button
+                      type="button"
+                      onClick={() => setCollegeSubMethod('email')}
+                      className="flex flex-col items-center justify-center p-6 bg-slate-50 hover:bg-blue-50/50 border border-slate-200 hover:border-blue-300 rounded-2xl text-center transition-all group active:scale-95"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <Mail className="w-6 h-6" />
+                      </div>
+                      <span className="font-bold text-slate-800 text-sm">Institutional Email OTP</span>
+                      <span className="text-xs text-slate-400 mt-1">Instant verification via OTP code sent to your student inbox.</span>
+                    </button>
+
+                    {/* Option 2: Upload Student ID Card */}
+                    <button
+                      type="button"
+                      onClick={() => setCollegeSubMethod('id_card')}
+                      className="flex flex-col items-center justify-center p-6 bg-slate-50 hover:bg-blue-50/50 border border-slate-200 hover:border-blue-300 rounded-2xl text-center transition-all group active:scale-95"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <ImageIcon className="w-6 h-6" />
+                      </div>
+                      <span className="font-bold text-slate-800 text-sm">Upload Student ID</span>
+                      <span className="text-xs text-slate-400 mt-1">Upload a photo of your physical campus ID card for manual check.</span>
+                    </button>
+                  </div>
+
+                  <Button type="button" variant="outline" className="w-full h-12 rounded-xl mt-2" onClick={() => setActiveSection(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              ) : collegeSubMethod === 'email' ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => { setCollegeSubMethod(null); setCodeSent(false); setAffiliationEmail(""); setOtpSlots(["","","","","",""]); }}
+                    className="text-xs text-blue-600 font-semibold flex items-center gap-1 hover:underline mb-4"
+                  >
+                    ← Back to verification choices
+                  </button>
+
+                  {!codeSent ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-slate-700">
+                          Your Institutional School Email (.edu / .ac)
+                        </Label>
+                        <Input
+                          type="email"
+                          placeholder="you@university.edu"
+                          value={affiliationEmail}
+                          onChange={(e) => setAffiliationEmail(e.target.value)}
+                          className="h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500/20 text-base"
+                        />
+                      </div>
+                      <Button type="button" className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg flex items-center justify-center gap-2" onClick={handleSendOtp} disabled={!affiliationEmail.trim() || isSendingCode}>
+                        {isSendingCode ? <><Loader2 className="w-5 h-5 animate-spin" />Sending code...</> : <><Mail className="w-5 h-5" />Send OTP Verification Code</>}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-5">
+                      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
+                        <p className="text-blue-800 text-sm font-medium">We sent a secure verification code to:</p>
+                        <p className="text-blue-900 font-bold text-base mt-0.5">{affiliationEmail}</p>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 text-center block">Enter 6-Digit OTP Code</label>
+                        <div className="flex gap-2 justify-center" onPaste={handleOtpPaste}>
+                          {otpSlots.map((digit, i) => (
+                            <input key={i} ref={el => otpRefs.current[i] = el}
+                              type="text" inputMode="numeric" maxLength={1} value={digit}
+                              onChange={e => handleOtpChange(i, e.target.value)}
+                              onKeyDown={e => handleOtpKey(i, e)}
+                              className={`w-12 h-14 text-center text-2xl font-bold border-2 rounded-xl outline-none transition-all ${
+                                digit ? "border-blue-500 bg-blue-50/50 text-blue-700" : "border-slate-200 bg-white text-slate-800"
+                              } focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button type="button" disabled={resendCooldown > 0} onClick={handleSendOtp} className="text-xs text-blue-600 hover:underline disabled:text-slate-400 disabled:no-underline font-semibold">
+                          {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+                        </button>
+                        <Button type="button" className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg" onClick={handleVerifyOtp} disabled={otpSlots.join("").length !== 6 || isVerifyingCode}>
+                          {isVerifyingCode ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Verifying...</> : "Verify & Complete"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <button
+                    type="button"
+                    onClick={() => { setCollegeSubMethod(null); setCollegeIdFile(null); setCollegeIdPreview(null); }}
+                    className="text-xs text-blue-600 font-semibold flex items-center gap-1 hover:underline mb-4"
+                  >
+                    ← Back to verification choices
+                  </button>
+
+                  {!collegeIdPreview ? (
+                    <label className="flex flex-col items-center justify-center aspect-[16/10] border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer group">
+                      <ImageIcon className="w-12 h-12 text-slate-300 group-hover:text-blue-500 transition-colors mb-2" />
+                      <span className="text-slate-600 font-semibold text-sm">Click to choose Student ID photo</span>
+                      <span className="text-slate-400 text-xs mt-1">PNG, JPG, or WEBP up to 5MB</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleCollegeFileChange}
+                      />
+                    </label>
+                  ) : (
+                    <div className="relative aspect-[16/10] bg-slate-100 rounded-3xl overflow-hidden shadow-inner border border-slate-200">
+                      <img src={collegeIdPreview} className="w-full h-full object-cover" alt="ID Preview" />
+                      <label className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md text-slate-700 hover:bg-white px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer shadow-md border border-slate-200 transition-colors flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4" /> Change ID
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleCollegeFileChange}
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  <div className="flex gap-4">
+                    <Button type="button" variant="outline" className="flex-1 h-12 rounded-xl" onClick={() => { setCollegeSubMethod(null); setCollegeIdFile(null); setCollegeIdPreview(null); }}>
+                      Cancel
+                    </Button>
+                    <Button type="button" className="flex-[2] h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg" onClick={handleUploadCollegeId} disabled={!collegeIdFile || isUploadingCollegeId}>
+                      {isUploadingCollegeId ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Uploading ID...</> : "Submit Student ID"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+
+      case 'work':
+        return (
+          <Card className="border-0 shadow-2xl rounded-3xl bg-white overflow-hidden max-w-xl mx-auto">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 sm:p-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-white/10 rounded-xl">
+                    <Briefcase className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl sm:text-2xl font-bold">Work ID Verification</CardTitle>
+                    <CardDescription className="text-white/80 text-xs sm:text-sm">Verify your affiliation instantly using corporate email OTP.</CardDescription>
                   </div>
                 </div>
                 <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 rounded-full" onClick={() => { setActiveSection(null); setCodeSent(false); setAffiliationEmail(""); setOtpSlots(["","","","","",""]); }}>
@@ -379,11 +586,11 @@ export function VerificationFlow() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold text-slate-700">
-                      {isCollege ? "Your Institutional School Email (.edu / .ac)" : "Your Professional Work Email Address"}
+                      Your Professional Work Email Address
                     </Label>
                     <Input
                       type="email"
-                      placeholder={isCollege ? "you@university.edu" : "you@company.com"}
+                      placeholder="you@company.com"
                       value={affiliationEmail}
                       onChange={(e) => setAffiliationEmail(e.target.value)}
                       className="h-12 rounded-xl border-slate-200 focus-visible:ring-blue-500/20 text-base"

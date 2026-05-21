@@ -683,9 +683,9 @@ app.post('/api/profile/complete', verifyToken, async (req, res, next) => {
           isWorkVerified = false;
         }
       } else {
-        isCollegeVerified = data.verificationType === 'college-id';
-        isWorkVerified = data.verificationType === 'work-id';
-        isPersonVerified = ['govt-id', 'phone-face'].includes(data.verificationType);
+        isCollegeVerified = false;
+        isWorkVerified = false;
+        isPersonVerified = false;
       }
 
       await tx.userProfile.upsert({
@@ -1013,7 +1013,7 @@ app.get('/api/admin/users', verifyToken, adminOnly, async (req, res, next) => {
 app.post('/api/admin/verify/:userId', verifyToken, adminOnly, async (req, res, next) => {
   try {
     const userId = parseInt(req.params.userId);
-    const { isVerified, isPersonVerified, isCollegeVerified, isWorkVerified } = req.body;
+    const { isVerified, isPersonVerified, isIdVerified, isCollegeVerified, isWorkVerified } = req.body;
     
     // Check if profile exists
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
@@ -1024,6 +1024,7 @@ app.post('/api/admin/verify/:userId', verifyToken, adminOnly, async (req, res, n
     if (isVerified !== undefined) updateData.isPersonVerified = isVerified;
 
     if (isPersonVerified !== undefined) updateData.isPersonVerified = isPersonVerified;
+    if (isIdVerified !== undefined) updateData.isIdVerified = isIdVerified;
     if (isCollegeVerified !== undefined) updateData.isCollegeVerified = isCollegeVerified;
     if (isWorkVerified !== undefined) updateData.isWorkVerified = isWorkVerified;
 
@@ -1126,6 +1127,16 @@ app.post('/api/verify/request', verifyToken, upload.fields([{ name: 'selfie', ma
         "verification_ids"
       );
       idCardUrl = idResult.secure_url;
+    } else if (method === 'college_id') {
+      if (!req.files?.idCard?.[0]) {
+        return res.status(400).json({ success: false, message: "Student ID card photo is required" });
+      }
+      const idResult = await uploadBuffer(
+        req.files.idCard[0].buffer,
+        req.files.idCard[0].mimetype,
+        "verification_ids"
+      );
+      idCardUrl = idResult.secure_url;
     } else if (method === 'id_document') {
       if (!req.files?.selfie?.[0]) {
         return res.status(400).json({ success: false, message: "Selfie is required" });
@@ -1200,17 +1211,22 @@ app.post('/api/admin/verifications/:id/resolve', verifyToken, adminOnly, async (
     const request = await prisma.verificationRequest.findUnique({ where: { id } });
     if (!request) return res.status(404).json({ success: false, message: "Request not found" });
 
-    const doFace = action === 'approve' ? !!faceVerified : false;
-    const doId = action === 'approve' ? !!idVerified : false;
-
     if (action === 'approve') {
+      const updateData = {};
+      if (request.verificationMethod === 'face') {
+        updateData.isPersonVerified = true;
+      } else if (request.verificationMethod === 'govt_id') {
+        updateData.isIdVerified = true;
+      } else if (request.verificationMethod === 'college_id') {
+        updateData.isCollegeVerified = true;
+      } else if (request.verificationMethod === 'id_document') {
+        updateData.isPersonVerified = !!faceVerified;
+        updateData.isIdVerified = !!idVerified;
+      }
+
       await prisma.userProfile.update({
         where: { userId: request.userId },
-        data: {
-          isFaceVerified: doFace,
-          isIdVerified: doId,
-          isPersonVerified: doFace && doId,
-        }
+        data: updateData
       });
     }
 

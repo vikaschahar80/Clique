@@ -138,13 +138,14 @@ export function AdminVerification() {
                         <TableHead>User</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Face Verified</TableHead>
+                        <TableHead>Govt ID Verified</TableHead>
                         <TableHead>College Verified</TableHead>
                         <TableHead>Work Verified</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loading ? (
-                        <TableRow><TableCell colSpan={5} className="text-center py-10 text-slate-400">Loading...</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={6} className="text-center py-10 text-slate-400">Loading...</TableCell></TableRow>
                       ) : filteredUsers.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell className="font-medium">
@@ -163,6 +164,22 @@ export function AdminVerification() {
                                 disabled={!user.profile}
                               />
                               {user.profile?.isPersonVerified ? (
+                                <span className="text-xs text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">Verified</span>
+                              ) : (
+                                <span className="text-xs text-slate-400">Unverified</span>
+                              )}
+                            </div>
+                          </TableCell>
+
+                          {/* Govt ID Verification */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Checkbox 
+                                checked={user.profile?.isIdVerified || false}
+                                onCheckedChange={() => handleToggleVerifyField(user.id, 'isIdVerified', user.profile?.isIdVerified)}
+                                disabled={!user.profile}
+                              />
+                              {user.profile?.isIdVerified ? (
                                 <span className="text-xs text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">Verified</span>
                               ) : (
                                 <span className="text-xs text-slate-400">Unverified</span>
@@ -225,59 +242,84 @@ export function AdminVerification() {
                   </div>
                   <CardContent className="p-4 space-y-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                        {req.verificationMethod === "email" ? "Email proof" : "ID document"}
+                      <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">
+                        Verification Method
                       </label>
+                      <span className="inline-block px-2.5 py-1 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold rounded-lg mb-2">
+                        {req.verificationMethod === "face" && "👤 Face Selfie Check"}
+                        {req.verificationMethod === "govt_id" && "🪪 Govt ID Card Document"}
+                        {req.verificationMethod === "college_id" && "🎓 Student Campus ID Card"}
+                        {req.verificationMethod === "email" && "📧 School/Work Email OTP"}
+                        {req.verificationMethod === "id_document" && "📄 Selfie & Govt ID"}
+                      </span>
+
                       {req.idCardUrl ? (
-                        <div className="aspect-[16/10] bg-black rounded-lg overflow-hidden group relative">
-                          <img src={req.idCardUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="ID Card" />
-                          <a href={req.idCardUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Eye className="text-white w-6 h-6" />
-                          </a>
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-slate-400 font-semibold block">Uploaded ID Document:</span>
+                          <div className="aspect-[16/10] bg-black rounded-lg overflow-hidden group relative border border-slate-200">
+                            <img src={req.idCardUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="ID Card" />
+                            <a href={req.idCardUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Eye className="text-white w-6 h-6" />
+                            </a>
+                          </div>
                         </div>
-                      ) : (
+                      ) : req.verificationMethod !== "face" ? (
                         <div className="aspect-[16/10] bg-slate-100 border border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center p-4 text-center text-sm text-slate-600">
                           <FileText className="w-8 h-8 text-slate-400 mb-2" />
                           <p className="font-medium text-slate-800">Verified by email</p>
                           <p className="text-xs text-slate-500 break-all mt-1">{req.affiliationEmail || "—"}</p>
                         </div>
-                      )}
+                      ) : null}
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Verification Selfie</label>
-                      <div className="aspect-square bg-black rounded-lg overflow-hidden group relative">
-                        <img src={req.selfieUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Selfie" />
-                        <a href={req.selfieUrl} target="_blank" className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Eye className="text-white w-6 h-6" />
-                        </a>
+
+                    {req.verificationMethod !== "college_id" && req.verificationMethod !== "govt_id" && (
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">Verification Selfie</label>
+                        <div className="aspect-square bg-black rounded-lg overflow-hidden group relative border border-slate-200">
+                          <img src={req.selfieUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Selfie" />
+                          <a href={req.selfieUrl} target="_blank" className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Eye className="text-white w-6 h-6" />
+                          </a>
+                        </div>
                       </div>
+                    )}
+
+                    <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs text-slate-500">
+                      <span className="font-semibold block text-slate-600">Decision Parameters:</span>
+                      {req.verificationMethod === "face" && "Clicking Approve will instantly verify Face Biometrics."}
+                      {req.verificationMethod === "govt_id" && "Clicking Approve will instantly verify Government ID."}
+                      {req.verificationMethod === "college_id" && "Clicking Approve will instantly verify Student College Badge."}
+                      {req.verificationMethod === "id_document" && "Use checkmarks below to verify Face/ID independently."}
                     </div>
-                    <div className="grid grid-cols-2 gap-3 pt-1">
-                      <label className="flex items-center gap-2 text-sm text-slate-700">
-                        <Checkbox
-                          checked={(requestDecisions[req.id]?.faceVerified) ?? true}
-                          onCheckedChange={(v) =>
-                            setRequestDecisions((prev) => ({
-                              ...prev,
-                              [req.id]: { ...(prev[req.id] || {}), faceVerified: !!v },
-                            }))
-                          }
-                        />
-                        Face verified
-                      </label>
-                      <label className="flex items-center gap-2 text-sm text-slate-700">
-                        <Checkbox
-                          checked={(requestDecisions[req.id]?.idVerified) ?? true}
-                          onCheckedChange={(v) =>
-                            setRequestDecisions((prev) => ({
-                              ...prev,
-                              [req.id]: { ...(prev[req.id] || {}), idVerified: !!v },
-                            }))
-                          }
-                        />
-                        {req.verificationMethod === "email" ? "Email proof OK" : "ID verified"}
-                      </label>
-                    </div>
+
+                    {req.verificationMethod === "id_document" && (
+                      <div className="grid grid-cols-2 gap-3 pt-1">
+                        <label className="flex items-center gap-2 text-sm text-slate-700">
+                          <Checkbox
+                            checked={(requestDecisions[req.id]?.faceVerified) ?? true}
+                            onCheckedChange={(v) =>
+                              setRequestDecisions((prev) => ({
+                                ...prev,
+                                [req.id]: { ...(prev[req.id] || {}), faceVerified: !!v },
+                              }))
+                            }
+                          />
+                          Face verified
+                        </label>
+                        <label className="flex items-center gap-2 text-sm text-slate-700">
+                          <Checkbox
+                            checked={(requestDecisions[req.id]?.idVerified) ?? true}
+                            onCheckedChange={(v) =>
+                              setRequestDecisions((prev) => ({
+                                ...prev,
+                                [req.id]: { ...(prev[req.id] || {}), idVerified: !!v },
+                              }))
+                            }
+                          />
+                          ID verified
+                        </label>
+                      </div>
+                    )}
                     <div className="flex gap-2 pt-2">
                       <Button 
                         onClick={() => handleResolveRequest(req.id, 'approve')}
