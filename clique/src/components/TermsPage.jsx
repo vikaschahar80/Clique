@@ -51,6 +51,7 @@ export function TermsPage() {
               <li><a href="#disclaimers" className="hover:underline">DISCLAIMER OF WARRANTIES</a></li>
               <li><a href="#liability" className="hover:underline">LIMITATION OF LIABILITY</a></li>
               <li><a href="#law" className="hover:underline">GOVERNING LAW & JURISDICTION</a></li>
+              <li><a href="#disputes" className="hover:underline">DISPUTE RESOLUTION</a></li>
               <li><a href="#contact" className="hover:underline">CONTACT AND SUPPORT INFORMATION</a></li>
             </ol>
           </div>
@@ -67,7 +68,7 @@ export function TermsPage() {
               <ul className="list-disc list-inside pl-4 space-y-1">
                 <li>You are at least 18 years of age.</li>
                 <li>You possess the legal authority to enter into a binding contract under applicable law.</li>
-                <li>You have never been convicted of a felony or indictable offense (or any offense of a sexual or violent nature).</li>
+                <li>You have not been convicted of any cognizable criminal offence under Indian law, particularly offences of a sexual or violent nature.</li>
                 <li>You will fully comply with these Terms and all applicable local, state, national, and international laws.</li>
               </ul>
             </section>
@@ -154,17 +155,23 @@ export function TermsPage() {
             {/* Section 10 */}
             <section id="law" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">10. GOVERNING LAW & JURISDICTION</h2>
-              <p>These Terms, your relationship with Clique, and any dispute arising out of your use of the services shall be governed exclusively by the laws of <strong>India</strong> (and the State of <strong>Maharashtra</strong>), without regard to its conflict of law principles. You agree to submit to the personal and exclusive jurisdiction of the courts located within <strong>Mumbai</strong> to resolve any legal matters.</p>
+              <p>These Terms, your relationship with Clique, and any dispute arising out of your use of the services shall be governed exclusively by the laws of <strong>India</strong> (and the State of <strong>Rajasthan</strong>), without regard to its conflict of law principles. You agree to submit to the personal and exclusive jurisdiction of the courts located within <strong>Udaipur, Rajasthan</strong> to resolve any legal matters.</p>
             </section>
 
             {/* Section 11 */}
+            <section id="disputes" className="scroll-mt-6">
+              <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">11. DISPUTE RESOLUTION</h2>
+              <p>In the event of any dispute, both parties agree to first attempt resolution via informal negotiation by emailing <a href="mailto:clique.social.vc@gmail.com" className="text-indigo-600 hover:underline">clique.social.vc@gmail.com</a>. If unresolved within 30 days, disputes shall be referred to binding arbitration under the Indian Arbitration and Conciliation Act, 1996, with the seat of arbitration being Udaipur, Rajasthan.</p>
+            </section>
+
+            {/* Section 12 */}
             <section id="contact" className="scroll-mt-6">
-              <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">11. CONTACT AND SUPPORT INFORMATION</h2>
+              <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">12. CONTACT AND SUPPORT INFORMATION</h2>
               <p>If you have any questions, concerns, or legal notices regarding these Terms, please contact us at:</p>
               <p className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm text-slate-600 font-mono">
                 Clique Legal Team<br />
                 Email: <a href="mailto:clique.social.vc@gmail.com" className="text-indigo-600 hover:underline">clique.social.vc@gmail.com</a><br />
-                Address: 19 Hostel Rd, Mumbai, Maharashtra 400076, India
+                Address: Udaipur, Rajasthan, India
               </p>
             </section>
 

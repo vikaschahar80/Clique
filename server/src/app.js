@@ -662,6 +662,21 @@ app.post('/api/profile/complete', verifyToken, async (req, res, next) => {
     const data = req.body;
 
     const parsedDob = new Date(data.dob);
+    if (isNaN(parsedDob.getTime())) {
+      return res.status(400).json({ success: false, message: "Invalid date of birth format" });
+    }
+
+    // Server-side age enforcement check (at least 18 years old)
+    const today = new Date();
+    let age = today.getFullYear() - parsedDob.getFullYear();
+    const m = today.getMonth() - parsedDob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < parsedDob.getDate())) {
+      age--;
+    }
+    if (age < 18) {
+      return res.status(400).json({ success: false, message: "You must be at least 18 years of age to register on Clique." });
+    }
+
     const parsedHeight = data.height ? parseInt(data.height) : null;
     const parsedMaxDistance = data.maxDistance ? parseInt(data.maxDistance) : 50;
     const parsedMinAge = data.ageRange?.min ? parseInt(data.ageRange.min) : 18;

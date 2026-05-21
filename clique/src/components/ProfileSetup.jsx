@@ -284,11 +284,30 @@ export function ProfileSetup({ user, onComplete }) {
   };
 
 
+  const getAge = (dobString) => {
+    if (!dobString) return 0;
+    const dobDate = new Date(dobString);
+    if (isNaN(dobDate.getTime())) return 0;
+    const today = new Date();
+    let age = today.getFullYear() - dobDate.getFullYear();
+    const m = today.getMonth() - dobDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   // --- Validation ---
   const canProceed = () => {
     switch (step) {
       case 1: // Basic
-        return basicInfo.dob && basicInfo.gender && basicInfo.location && basicInfo.phoneNumber;
+        return (
+          basicInfo.dob &&
+          getAge(basicInfo.dob) >= 18 &&
+          basicInfo.gender &&
+          basicInfo.location &&
+          basicInfo.phoneNumber
+        );
       case 2: // Work/Ed
         return true; // Optional
       case 3: // Family
@@ -356,6 +375,11 @@ export function ProfileSetup({ user, onComplete }) {
             <div className="space-y-2">
               <Label>Date of Birth *</Label>
               <Input type="date" value={basicInfo.dob} onChange={e => updateBasic('dob', e.target.value)} />
+              {basicInfo.dob && getAge(basicInfo.dob) < 18 && (
+                <p className="text-xs text-red-500 font-semibold flex items-center gap-1 mt-1 animate-pulse">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Minimum age requirement is 18 years.
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Gender *</Label>
