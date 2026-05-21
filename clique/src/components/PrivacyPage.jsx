@@ -47,7 +47,7 @@ export function PrivacyPage() {
               </li>
             </ul>
             <p className="mt-4 mb-0 text-slate-500 text-xs">
-              <strong>Questions or concerns?</strong> Reading this Privacy Notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="https://clique-tubd.onrender.com" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">https://clique-tubd.onrender.com</a>.
+              <strong>Questions or concerns?</strong> Reading this Privacy Notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="mailto:clique.social.vc@gmail.com" className="text-blue-600 hover:underline">clique.social.vc@gmail.com</a>.
             </p>
           </div>
 
@@ -120,7 +120,6 @@ export function PrivacyPage() {
                 <li>Email addresses</li>
                 <li>Usernames and Passwords</li>
                 <li>Job titles and professional work profiles</li>
-                <li>Billing addresses and payment card details</li>
               </ul>
 
               <h3 className="text-lg font-bold text-slate-800 mt-6 mb-2">Sensitive Information</h3>
@@ -150,7 +149,6 @@ export function PrivacyPage() {
                 <li><strong>To deliver and facilitate delivery of services to you</strong></li>
                 <li><strong>To respond to user inquiries and offer help/support</strong></li>
                 <li><strong>To send administrative information</strong></li>
-                <li><strong>To fulfill and manage orders</strong></li>
                 <li><strong>To enable user-to-user communications (real-time chat)</strong></li>
                 <li><strong>To request feedback</strong></li>
                 <li><strong>To evaluate and improve our Services, products, and user experiences</strong></li>
@@ -165,7 +163,6 @@ export function PrivacyPage() {
                 <li>Data Analytics Services (to measure traffic)</li>
                 <li>Cloud Computing & Storage Services (Cloudinary, Neon, MongoDB)</li>
                 <li>Social Networks (if you connect your accounts)</li>
-                <li>Payment Processors (if premium features are selected)</li>
                 <li>Government Entities (only if required by valid law)</li>
                 <li>Website Hosting Service Providers (Vercel, Render)</li>
               </ul>
@@ -219,7 +216,17 @@ export function PrivacyPage() {
             <section id="otherlaws" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">10. DO OTHER REGIONS HAVE SPECIFIC PRIVACY RIGHTS?</h2>
               <p>Depending on your country of residence, you have additional rights:</p>
-              <h3 className="text-base font-bold text-slate-800 mt-4">Australia and New Zealand</h3>
+              
+              <h3 className="text-base font-bold text-slate-800 mt-4">India (Digital Personal Data Protection Act, 2023 - DPDP)</h3>
+              <p>Under India's Digital Personal Data Protection (DPDP) Act 2023, you as a Data Principal have the following statutory rights:</p>
+              <ul className="list-disc list-inside pl-4 space-y-1 mt-2 text-slate-600">
+                <li><strong>Right to withdraw consent:</strong> You can withdraw your consent to data processing at any time.</li>
+                <li><strong>Right to correction and erasure:</strong> You can request the correction of inaccurate data or the absolute erasure of your profile.</li>
+                <li><strong>Right of grievance redressal:</strong> You can file a complaint with our Grievance Officer regarding any data processing concern.</li>
+                <li><strong>Right to nominate:</strong> You can nominate another individual to exercise your rights in the event of death or incapacity.</li>
+              </ul>
+
+              <h3 className="text-base font-bold text-slate-800 mt-6">Australia and New Zealand</h3>
               <p>We process under Australia's Privacy Act 1988 and New Zealand's Privacy Act 2020. You have the right to request access to or correction of your personal data at any time.</p>
               <h3 className="text-base font-bold text-slate-800 mt-4">Republic of South Africa</h3>
               <p>Under POPIA/PAIA, you have full rights to request access, correction, or deletion of your personal records by contacting the South African Information Regulator.</p>
@@ -235,19 +242,24 @@ export function PrivacyPage() {
             <section id="contact" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">12. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</h2>
               <p>If you have questions or comments about this notice, you may email us at: <a href="mailto:clique.social.vc@gmail.com" className="text-blue-600 hover:underline font-bold">clique.social.vc@gmail.com</a></p>
-              <p className="mt-4 font-semibold text-slate-700">Or contact us by post at:</p>
-              <p className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm text-slate-600 font-mono">
-                Clique<br />
-                19 Hostel Rd<br />
-                Mumbai, Maharashtra 400076<br />
-                India
-              </p>
+              
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mt-6">
+                <h3 className="text-lg font-bold text-blue-900 mb-2">Grievance Officer (India DPDP Act Redressal)</h3>
+                <p className="text-sm text-blue-800 mb-4">
+                  In accordance with the India Digital Personal Data Protection (DPDP) Act 2023, if you have any queries, concerns, or grievances regarding the processing of your personal data, you may contact our designated Grievance Officer:
+                </p>
+                <div className="text-sm text-blue-900 font-semibold space-y-1 bg-white/60 p-4 rounded-xl border border-blue-100/50">
+                  <div>👤 <strong>Grievance Officer:</strong> Vikash Chahar</div>
+                  <div>✉️ <strong>Email:</strong> <a href="mailto:clique.social.vc@gmail.com" className="underline hover:text-blue-700">clique.social.vc@gmail.com</a></div>
+                  <div>📍 <strong>Address:</strong> Electronic Redressal Cell, Clique Social, India</div>
+                </div>
+              </div>
             </section>
 
             {/* Section 13 */}
             <section id="request" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">13. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT?</h2>
-              <p>Based on the applicable laws of your country, you have the right to request access to the personal information we collect from you, correct inaccuracies, or delete your profile. To make a request, please visit: <a href="https://clique-tubd.onrender.com" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">https://clique-tubd.onrender.com</a>.</p>
+              <p>Based on the applicable laws of your country, you have the right to request access to the personal information we collect from you, correct inaccuracies, or delete your profile. To make a request, please contact us by emailing our support desk directly at: <a href="mailto:clique.social.vc@gmail.com" className="text-blue-600 hover:underline font-bold">clique.social.vc@gmail.com</a>.</p>
             </section>
 
           </div>
