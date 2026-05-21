@@ -583,7 +583,7 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
         college: p.college || "",
         aboutMe: p.aboutMe || "",
         bio: p.bio || "",
-        verificationStatus: { collegeVerified: p.isCollegeVerified, workVerified: p.isWorkVerified, personVerified: p.isPersonVerified },
+        verificationStatus: { collegeVerified: p.isCollegeVerified, workVerified: p.isWorkVerified, personVerified: p.isPersonVerified, idVerified: p.isIdVerified },
         prompts,
         interests: p.interests || [],
         lifestyle: { drinking: p.drinking?.toLowerCase() || "", smoking: p.smoking?.toLowerCase() || "", drugs: p.drugs?.toLowerCase() || "", exercise: p.exercise?.toLowerCase() || "" },
@@ -1040,17 +1040,25 @@ app.get('/api/verify/status', verifyToken, async (req, res, next) => {
   try {
     const userId = parseInt(req.user.userId);
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
-    const latestRequest = await prisma.verificationRequest.findFirst({
+    const requests = await prisma.verificationRequest.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
 
     res.json({
       success: true,
-      isVerified: profile?.isPersonVerified || false,
-      status: latestRequest?.status || 'none', // 'pending' | 'approved' | 'rejected' | 'none'
-      createdAt: latestRequest?.createdAt || null,
-      resolvedAt: latestRequest?.resolvedAt || null,
+      isPersonVerified: profile?.isPersonVerified || false,
+      isIdVerified: profile?.isIdVerified || false,
+      isCollegeVerified: profile?.isCollegeVerified || false,
+      isWorkVerified: profile?.isWorkVerified || false,
+      college: profile?.college || null,
+      work: profile?.work || null,
+      requests: requests.map(r => ({
+        id: r.id,
+        method: r.verificationMethod,
+        status: r.status,
+        createdAt: r.createdAt
+      }))
     });
   } catch (error) { next(error); }
 });
@@ -1059,11 +1067,10 @@ app.get('/api/verify/status', verifyToken, async (req, res, next) => {
 app.post('/api/verify/request', verifyToken, upload.fields([{ name: 'selfie', maxCount: 1 }, { name: 'idCard', maxCount: 1 }]), async (req, res, next) => {
   try {
     const userId = parseInt(req.user.userId);
-    const method = (req.body?.method || 'id_document').toString() === 'email' ? 'email' : 'id_document';
+    const method = req.body?.method || 'id_document'; // face | govt_id | id_document | email
 
-    if (!req.files?.selfie?.[0]) {
-      return res.status(400).json({ success: false, message: "Selfie is required" });
-    }
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     // Determine which Cloudinary to use for verification
     const uploader = process.env.CLOUDINARY_SECRET_VERIFY ? cloudinaryVerify : cloudinaryMain;
@@ -1076,27 +1083,42 @@ app.post('/api/verify/request', verifyToken, upload.fields([{ name: 'selfie', ma
         folder: folder,
         transformation: [
           { width: 1000, crop: "limit" },
-          { quality: "auto:eco" }, // High compression to save space as requested
+          { quality: "auto:eco" },
           { fetch_format: "auto" }
         ]
       });
     };
 
-    const selfieResult = await uploadBuffer(
-      req.files.selfie[0].buffer,
-      req.files.selfie[0].mimetype,
-      "verification_selfies"
-    );
-
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
+    let selfieUrl = "";
     let idCardUrl = null;
     let affiliationEmail = null;
 
-    if (method === 'id_document') {
+    // Retrieve previous request to reuse selfie if none uploaded
+    const lastRequest = await prisma.verificationRequest.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (req.files?.selfie?.[0]) {
+      const selfieResult = await uploadBuffer(
+        req.files.selfie[0].buffer,
+        req.files.selfie[0].mimetype,
+        "verification_selfies"
+      );
+      selfieUrl = selfieResult.secure_url;
+    } else if (lastRequest?.selfieUrl) {
+      selfieUrl = lastRequest.selfieUrl;
+    } else {
+      selfieUrl = "https://res.cloudinary.com/placeholder-selfie.png";
+    }
+
+    if (method === 'face') {
+      if (!req.files?.selfie?.[0]) {
+        return res.status(400).json({ success: false, message: "Selfie is required for face verification" });
+      }
+    } else if (method === 'govt_id') {
       if (!req.files?.idCard?.[0]) {
-        return res.status(400).json({ success: false, message: "ID card is required for document verification" });
+        return res.status(400).json({ success: false, message: "Govt ID document photo is required" });
       }
       const idResult = await uploadBuffer(
         req.files.idCard[0].buffer,
@@ -1104,7 +1126,20 @@ app.post('/api/verify/request', verifyToken, upload.fields([{ name: 'selfie', ma
         "verification_ids"
       );
       idCardUrl = idResult.secure_url;
-    } else {
+    } else if (method === 'id_document') {
+      if (!req.files?.selfie?.[0]) {
+        return res.status(400).json({ success: false, message: "Selfie is required" });
+      }
+      if (!req.files?.idCard?.[0]) {
+        return res.status(400).json({ success: false, message: "Govt ID document photo is required" });
+      }
+      const idResult = await uploadBuffer(
+        req.files.idCard[0].buffer,
+        req.files.idCard[0].mimetype,
+        "verification_ids"
+      );
+      idCardUrl = idResult.secure_url;
+    } else if (method === 'email') {
       const profile = await prisma.userProfile.findUnique({ where: { userId } });
       if (!profile) {
         return res.status(400).json({ success: false, message: "Complete your profile before verifying" });
@@ -1119,18 +1154,13 @@ app.post('/api/verify/request', verifyToken, upload.fields([{ name: 'selfie', ma
       if (!affiliationEmail) {
         return res.status(400).json({
           success: false,
-          message: "Verify your school, work, or other email before submitting (email path)",
+          message: "Verify your email before submitting (email path)",
         });
       }
     }
 
-    const existingPending = await prisma.verificationRequest.findFirst({
-      where: { userId, status: 'pending' },
-      orderBy: { createdAt: 'desc' },
-    });
-
     const requestPayload = {
-      selfieUrl: selfieResult.secure_url,
+      selfieUrl,
       idCardUrl,
       verificationMethod: method,
       affiliationEmail,
@@ -1139,19 +1169,13 @@ app.post('/api/verify/request', verifyToken, upload.fields([{ name: 'selfie', ma
       status: 'pending',
     };
 
-    if (existingPending) {
-      await prisma.verificationRequest.update({
-        where: { id: existingPending.id },
-        data: requestPayload,
-      });
-    } else {
-      await prisma.verificationRequest.create({
-        data: {
-          userId,
-          ...requestPayload,
-        }
-      });
-    }
+    // Keep it separate and clear
+    await prisma.verificationRequest.create({
+      data: {
+        userId,
+        ...requestPayload,
+      }
+    });
 
     res.json({ success: true, message: "Verification request submitted" });
   } catch (error) { next(error); }

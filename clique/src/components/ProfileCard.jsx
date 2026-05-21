@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, MapPin, Briefcase, GraduationCap, Heart, X, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin, Briefcase, GraduationCap, Heart, X, Info, Shield } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 export function ProfileCard({ profile, onLike, onPass }) {
@@ -64,10 +64,15 @@ export function ProfileCard({ profile, onLike, onPass }) {
                         <div className="flex items-center gap-2 mb-2">
                             <h2 className="text-white text-3xl font-bold">{profile.name}, {profile.age}</h2>
                             {profile.verificationStatus?.personVerified && (
-                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center" title="Verified Person">
+                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-md" title="Verified Person">
                                     <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
+                                </div>
+                            )}
+                            {profile.verificationStatus?.idVerified && (
+                                <div className="w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center shadow-md" title="Govt ID Verified">
+                                    <Shield className="w-3.5 h-3.5 text-white" />
                                 </div>
                             )}
                         </div>
