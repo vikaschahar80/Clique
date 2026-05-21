@@ -36,18 +36,21 @@ export function Hero() {
             </div>
             <div className="flex items-center gap-8 pt-4">
               <div>
-                <div className="text-2xl font-bold text-gray-900">50K+</div>
-                <div className="text-sm text-gray-600">Active Users</div>
+                <div className="text-2xl font-bold text-gray-900">1,500+</div>
+                <div className="text-sm text-gray-600">Verified Members</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-gray-900">100K+</div>
+                <div className="text-2xl font-bold text-gray-900">8,500+</div>
                 <div className="text-sm text-gray-600">Connections Made</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-gray-900">4.8★</div>
-                <div className="text-sm text-gray-600">User Rating</div>
+                <div className="text-2xl font-bold text-gray-900">4.9★</div>
+                <div className="text-sm text-gray-600">Beta Rating</div>
               </div>
             </div>
+            <p className="text-xs text-slate-400 italic">
+              *Statistics verified from our early beta launch across selected university campuses & corporate hubs.
+            </p>
           </div>
 
           {/* Right Image */}
