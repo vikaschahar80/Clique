@@ -668,6 +668,26 @@ app.post('/api/profile/complete', verifyToken, async (req, res, next) => {
     const parsedMaxAge = data.ageRange?.max ? parseInt(data.ageRange.max) : 100;
 
     await prisma.$transaction(async (tx) => {
+      const existingProfile = await tx.userProfile.findUnique({ where: { userId } });
+
+      let isCollegeVerified = existingProfile ? existingProfile.isCollegeVerified : false;
+      let isWorkVerified = existingProfile ? existingProfile.isWorkVerified : false;
+      let isPersonVerified = existingProfile ? existingProfile.isPersonVerified : false;
+
+      // Invalidate verification tick if college/work name has been modified
+      if (existingProfile) {
+        if (existingProfile.college !== data.college) {
+          isCollegeVerified = false;
+        }
+        if (existingProfile.work !== data.work) {
+          isWorkVerified = false;
+        }
+      } else {
+        isCollegeVerified = data.verificationType === 'college-id';
+        isWorkVerified = data.verificationType === 'work-id';
+        isPersonVerified = ['govt-id', 'phone-face'].includes(data.verificationType);
+      }
+
       await tx.userProfile.upsert({
         where: { userId },
         update: {
@@ -685,9 +705,9 @@ app.post('/api/profile/complete', verifyToken, async (req, res, next) => {
           sexuality: data.sexuality,
           gender: data.gender,
           phoneNumber: data.phoneNumber,
-          isCollegeVerified: data.verificationType === 'college-id',
-          isWorkVerified: data.verificationType === 'work-id',
-          isPersonVerified: ['govt-id', 'phone-face'].includes(data.verificationType),
+          isCollegeVerified,
+          isWorkVerified,
+          isPersonVerified,
           work: data.work,
           college: data.college,
           children: data.children,
@@ -726,9 +746,9 @@ app.post('/api/profile/complete', verifyToken, async (req, res, next) => {
           sexuality: data.sexuality,
           gender: data.gender,
           phoneNumber: data.phoneNumber,
-          isCollegeVerified: data.verificationType === 'college-id',
-          isWorkVerified: data.verificationType === 'work-id',
-          isPersonVerified: ['govt-id', 'phone-face'].includes(data.verificationType),
+          isCollegeVerified,
+          isWorkVerified,
+          isPersonVerified,
           work: data.work,
           college: data.college,
           children: data.children,
@@ -993,15 +1013,23 @@ app.get('/api/admin/users', verifyToken, adminOnly, async (req, res, next) => {
 app.post('/api/admin/verify/:userId', verifyToken, adminOnly, async (req, res, next) => {
   try {
     const userId = parseInt(req.params.userId);
-    const { isVerified } = req.body;
+    const { isVerified, isPersonVerified, isCollegeVerified, isWorkVerified } = req.body;
     
     // Check if profile exists
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
     if (!profile) return res.status(404).json({ success: false, message: 'User profile not found' });
 
+    const updateData = {};
+    // Backward compatibility for general isVerified toggling face verification
+    if (isVerified !== undefined) updateData.isPersonVerified = isVerified;
+
+    if (isPersonVerified !== undefined) updateData.isPersonVerified = isPersonVerified;
+    if (isCollegeVerified !== undefined) updateData.isCollegeVerified = isCollegeVerified;
+    if (isWorkVerified !== undefined) updateData.isWorkVerified = isWorkVerified;
+
     await prisma.userProfile.update({
       where: { userId },
-      data: { isPersonVerified: isVerified }
+      data: updateData
     });
     
     res.json({ success: true });

@@ -45,15 +45,15 @@ export function AdminVerification() {
     loadAll();
   }, []);
 
-  const handleToggleVerify = async (userId, currentStatus) => {
+  const handleToggleVerifyField = async (userId, fieldName, currentStatus) => {
     try {
       const newStatus = !currentStatus;
-      const response = await api.post(`/api/admin/verify/${userId}`, { isVerified: newStatus });
+      const response = await api.post(`/api/admin/verify/${userId}`, { [fieldName]: newStatus });
       if (response.data.success) {
         setUsers(users.map(u => 
-          u.id === userId ? { ...u, profile: { ...u.profile, isPersonVerified: newStatus } } : u
+          u.id === userId ? { ...u, profile: { ...u.profile, [fieldName]: newStatus } } : u
         ));
-        toast.success(`User updated`);
+        toast.success(`Verification status updated`);
       }
     } catch (error) {
       toast.error("Failed to update status");
@@ -137,30 +137,69 @@ export function AdminVerification() {
                       <TableRow>
                         <TableHead>User</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Verified</TableHead>
-                        <TableHead className="text-right">Manual Verify</TableHead>
+                        <TableHead>Face Verified</TableHead>
+                        <TableHead>College Verified</TableHead>
+                        <TableHead>Work Verified</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loading ? (
-                        <TableRow><TableCell colSpan={4} className="text-center py-10 text-slate-400">Loading...</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={5} className="text-center py-10 text-slate-400">Loading...</TableCell></TableRow>
                       ) : filteredUsers.map((user) => (
                         <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.fullName}</TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>
-                            {user.profile?.isPersonVerified ? (
-                              <CheckCircle className="w-5 h-5 text-green-500" />
-                            ) : (
-                              <XCircle className="w-5 h-5 text-slate-300" />
-                            )}
+                          <TableCell className="font-medium">
+                            <div className="font-semibold text-slate-800">{user.fullName}</div>
+                            {user.profile?.college && <div className="text-xs text-slate-500">🎓 {user.profile.college}</div>}
+                            {user.profile?.work && <div className="text-xs text-slate-500">💼 {user.profile.work}</div>}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <Checkbox 
-                              checked={user.profile?.isPersonVerified || false}
-                              onCheckedChange={() => handleToggleVerify(user.id, user.profile?.isPersonVerified)}
-                              disabled={!user.profile}
-                            />
+                          <TableCell className="text-slate-600 text-sm">{user.email}</TableCell>
+                          
+                          {/* Face Verification */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Checkbox 
+                                checked={user.profile?.isPersonVerified || false}
+                                onCheckedChange={() => handleToggleVerifyField(user.id, 'isPersonVerified', user.profile?.isPersonVerified)}
+                                disabled={!user.profile}
+                              />
+                              {user.profile?.isPersonVerified ? (
+                                <span className="text-xs text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">Verified</span>
+                              ) : (
+                                <span className="text-xs text-slate-400">Unverified</span>
+                              )}
+                            </div>
+                          </TableCell>
+
+                          {/* College Verification */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Checkbox 
+                                checked={user.profile?.isCollegeVerified || false}
+                                onCheckedChange={() => handleToggleVerifyField(user.id, 'isCollegeVerified', user.profile?.isCollegeVerified)}
+                                disabled={!user.profile || !user.profile.college}
+                              />
+                              {user.profile?.isCollegeVerified ? (
+                                <span className="text-xs text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">Verified</span>
+                              ) : (
+                                <span className="text-xs text-slate-400">Unverified</span>
+                              )}
+                            </div>
+                          </TableCell>
+
+                          {/* Work Verification */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Checkbox 
+                                checked={user.profile?.isWorkVerified || false}
+                                onCheckedChange={() => handleToggleVerifyField(user.id, 'isWorkVerified', user.profile?.isWorkVerified)}
+                                disabled={!user.profile || !user.profile.work}
+                              />
+                              {user.profile?.isWorkVerified ? (
+                                <span className="text-xs text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">Verified</span>
+                              ) : (
+                                <span className="text-xs text-slate-400">Unverified</span>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

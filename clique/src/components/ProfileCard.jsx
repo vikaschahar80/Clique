@@ -78,7 +78,11 @@ export function ProfileCard({ profile, onLike, onPass }) {
                                     <Briefcase className="w-4 h-4" />
                                     <span className="font-medium">{profile.work}</span>
                                     {profile.verificationStatus?.workVerified && (
-                                        <span className="text-blue-400">✓</span>
+                                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center inline-flex shadow-sm" title="Verified Work">
+                                            <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -87,7 +91,11 @@ export function ProfileCard({ profile, onLike, onPass }) {
                                     <GraduationCap className="w-4 h-4" />
                                     <span className="font-medium">{profile.college}</span>
                                     {profile.verificationStatus?.collegeVerified && (
-                                        <span className="text-blue-400">✓</span>
+                                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center inline-flex shadow-sm" title="Verified College">
+                                            <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
                                     )}
                                 </div>
                             )}
