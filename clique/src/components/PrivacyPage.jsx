@@ -14,7 +14,7 @@ export function PrivacyPage() {
         <div className="bg-white rounded-3xl p-8 md:p-12 border border-slate-200 shadow-xl overflow-hidden relative mb-8">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100/30 rounded-full blur-3xl -z-10" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-100/30 rounded-full blur-3xl -z-10" />
-          
+
           <div className="flex items-center gap-3 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wider w-fit mb-6">
             <Shield className="w-4 h-4" /> Privacy Center
           </div>
@@ -29,7 +29,7 @@ export function PrivacyPage() {
 
         {/* Content Card */}
         <div className="bg-white rounded-3xl p-8 md:p-12 border border-slate-200 shadow-xl prose prose-slate max-w-none text-slate-600 leading-relaxed space-y-8">
-          
+
           {/* Introductory Notice */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-sm md:text-base">
             <p className="m-0 font-medium text-slate-700">
@@ -105,14 +105,14 @@ export function PrivacyPage() {
 
           {/* Detailed Sections */}
           <div className="space-y-12">
-            
+
             {/* Section 1 */}
             <section id="infocollect" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">1. WHAT INFORMATION DO WE COLLECT?</h2>
-              
+
               <h3 className="text-lg font-bold text-slate-800 mt-4 mb-2">Personal information you disclose to us</h3>
               <p>We collect personal information that you voluntarily provide to us when you register on the Services, express interest in obtaining info, participate in activities, or otherwise contact us.</p>
-              
+
               <p className="font-semibold text-slate-700 mt-3">Personal Information Provided by You:</p>
               <ul className="list-disc list-inside pl-4 space-y-1">
                 <li>Names</li>
@@ -197,7 +197,7 @@ export function PrivacyPage() {
             <section id="privacyrights" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">8. WHAT ARE YOUR PRIVACY RIGHTS?</h2>
               <p>Depending on your location, you may have specific privacy rights regarding your personal information. You can review, change, or terminate your account at any time.</p>
-              
+
               <h3 className="text-lg font-bold text-slate-800 mt-4 mb-2">Account Information</h3>
               <p>If you would at any time like to review or change the information in your account or terminate your account, you can:</p>
               <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl mt-2 text-sm text-slate-700">
@@ -216,7 +216,7 @@ export function PrivacyPage() {
             <section id="otherlaws" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">10. DO OTHER REGIONS HAVE SPECIFIC PRIVACY RIGHTS?</h2>
               <p>Depending on your country of residence, you have additional rights:</p>
-              
+
               <h3 className="text-base font-bold text-slate-800 mt-4">India (Digital Personal Data Protection Act, 2023 - DPDP)</h3>
               <p>Under India's Digital Personal Data Protection (DPDP) Act 2023, you as a Data Principal have the following statutory rights:</p>
               <ul className="list-disc list-inside pl-4 space-y-1 mt-2 text-slate-600">
@@ -242,16 +242,16 @@ export function PrivacyPage() {
             <section id="contact" className="scroll-mt-6">
               <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">12. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</h2>
               <p>If you have questions or comments about this notice, you may email us at: <a href="mailto:clique.social.vc@gmail.com" className="text-blue-600 hover:underline font-bold">clique.social.vc@gmail.com</a></p>
-              
+
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mt-6">
                 <h3 className="text-lg font-bold text-blue-900 mb-2">Grievance Officer (India DPDP Act Redressal)</h3>
                 <p className="text-sm text-blue-800 mb-4">
                   In accordance with the India Digital Personal Data Protection (DPDP) Act 2023, if you have any queries, concerns, or grievances regarding the processing of your personal data, you may contact our designated Grievance Officer:
                 </p>
                 <div className="text-sm text-blue-900 font-semibold space-y-1 bg-white/60 p-4 rounded-xl border border-blue-100/50">
-                  <div>👤 <strong>Grievance Officer:</strong> Vikash Chahar</div>
+                  <div>👤 <strong>Grievance Officer:</strong> Vikas</div>
                   <div>✉️ <strong>Email:</strong> <a href="mailto:clique.social.vc@gmail.com" className="underline hover:text-blue-700">clique.social.vc@gmail.com</a></div>
-                  <div>📍 <strong>Address:</strong> Electronic Redressal Cell, Clique Social, India</div>
+                  <div>📍 <strong>Address:</strong> Udaipur, Rajasthan, India</div>
                 </div>
               </div>
             </section>
