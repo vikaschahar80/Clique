@@ -6,6 +6,9 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Card, CardContent } from "./ui/card";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Checkbox } from "./ui/checkbox";
 import { Shield, Camera, Heart, Briefcase, GraduationCap, MapPin, Cake, Ruler, CheckCircle2, Upload, X, Users, Calendar, ArrowLeft, Save, Loader2, User, FileText, Coffee, Settings, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import api from "../lib/axios";
@@ -50,7 +53,9 @@ export function EditProfile() {
     preferredName: "",
     identityMode: "real-name",
     aliasExpiry: "",
-    verificationType: "govt-id"
+    isPersonVerified: false,
+    isCollegeVerified: false,
+    isWorkVerified: false
   });
 
   const [photos, setPhotos] = useState([]);
@@ -139,7 +144,9 @@ export function EditProfile() {
               preferredName: profile.preferredName || user.fullName || "",
               identityMode: profile.identityMode || "real-name",
               aliasExpiry: profile.aliasExpiry || "",
-              verificationType: profile.isCollegeVerified ? 'college-id' : profile.isWorkVerified ? 'work-id' : 'govt-id'
+              isPersonVerified: profile.isPersonVerified || false,
+              isCollegeVerified: profile.isCollegeVerified || false,
+              isWorkVerified: profile.isWorkVerified || false
             });
 
             setPhotos(profile.photos && Array.isArray(profile.photos) ? profile.photos : []);
@@ -469,12 +476,52 @@ export function EditProfile() {
                   </RadioGroup>
                 </div>
                 <div className="space-y-4 p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                  <Label className="text-slate-700 font-semibold">Verification Method</Label>
-                  <RadioGroup className="flex flex-col sm:flex-row gap-4" value={identity.verificationType} onValueChange={v => updateIdentity('verificationType', v)}>
-                    <div className="flex items-center space-x-2 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm"><RadioGroupItem value="govt-id" id="v1" /><Label htmlFor="v1" className="cursor-pointer font-medium">Govt ID</Label></div>
-                    <div className="flex items-center space-x-2 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm"><RadioGroupItem value="college-id" id="v2" /><Label htmlFor="v2" className="cursor-pointer font-medium">College ID</Label></div>
-                    <div className="flex items-center space-x-2 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm"><RadioGroupItem value="work-id" id="v3" /><Label htmlFor="v3" className="cursor-pointer font-medium">Work ID</Label></div>
-                  </RadioGroup>
+                  <Label className="text-slate-700 font-semibold text-base block">Choose Verification Type(s)</Label>
+                  <p className="text-slate-400 text-xs mb-2">Select which verification credentials you wish to apply to your Clique account. You can select any combination!</p>
+                  
+                  <div className="space-y-3">
+                    {/* Face Verification */}
+                    <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                      <div className="flex flex-col pr-4">
+                        <span className="font-semibold text-slate-800 text-sm">Face Verification (Live Photo)</span>
+                        <span className="text-xs text-slate-400">Adds an identity checkmark badge directly next to your profile name.</span>
+                      </div>
+                      <Checkbox 
+                        checked={identity.isPersonVerified || false}
+                        onCheckedChange={(checked) => updateIdentity('isPersonVerified', !!checked)}
+                      />
+                    </div>
+
+                    {/* College Verification */}
+                    <div className={`flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-opacity duration-300 ${!workEd.college ? 'opacity-50' : ''}`}>
+                      <div className="flex flex-col pr-4">
+                        <span className="font-semibold text-slate-800 text-sm">College Affiliation Verification</span>
+                        <span className="text-xs text-slate-400">
+                          {workEd.college ? `Adds a graduation cap verification badge next to "${workEd.college}".` : "Please enter your college name in the 'Work/Ed' tab first."}
+                        </span>
+                      </div>
+                      <Checkbox 
+                        checked={identity.isCollegeVerified || false}
+                        onCheckedChange={(checked) => updateIdentity('isCollegeVerified', !!checked)}
+                        disabled={!workEd.college}
+                      />
+                    </div>
+
+                    {/* Work Verification */}
+                    <div className={`flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-opacity duration-300 ${!workEd.work ? 'opacity-50' : ''}`}>
+                      <div className="flex flex-col pr-4">
+                        <span className="font-semibold text-slate-800 text-sm">Professional Work Verification</span>
+                        <span className="text-xs text-slate-400">
+                          {workEd.work ? `Adds a business briefcase verification badge next to "${workEd.work}".` : "Please enter your job title in the 'Work/Ed' tab first."}
+                        </span>
+                      </div>
+                      <Checkbox 
+                        checked={identity.isWorkVerified || false}
+                        onCheckedChange={(checked) => updateIdentity('isWorkVerified', !!checked)}
+                        disabled={!workEd.work}
+                      />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 
