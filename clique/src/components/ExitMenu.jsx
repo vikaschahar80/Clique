@@ -1,12 +1,27 @@
 import { LogOut, Trash2, PauseCircle, X, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../lib/axios";
 
 export function ExitMenu({ isOpen, onClose, onLogout }) {
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch current pause status when menu opens
+  useEffect(() => {
+    if (isOpen) {
+      api.get("/api/profile/me")
+        .then(response => {
+          if (response.data.success && response.data.user?.profile) {
+            setIsPaused(response.data.user.profile.isPaused || false);
+          }
+        })
+        .catch(err => console.error("Failed to load profile status", err));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -23,9 +38,24 @@ export function ExitMenu({ isOpen, onClose, onLogout }) {
     navigate("/");
   };
 
-  const handlePause = () => {
-    toast.success("Account paused. You are now invisible.");
-    onClose();
+  const handleTogglePause = async () => {
+    setLoading(true);
+    try {
+      const response = await api.post("/api/profile/toggle-pause");
+      if (response.data.success) {
+        setIsPaused(response.data.isPaused);
+        if (response.data.isPaused) {
+          toast.success("Account paused. You are now invisible.");
+        } else {
+          toast.success("Account unpaused. Welcome back!");
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to change account status.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -73,11 +103,12 @@ export function ExitMenu({ isOpen, onClose, onLogout }) {
         <div className="px-4 pb-6 space-y-3">
 
           <MenuItem
-            icon={<PauseCircle className="w-5 h-5 text-indigo-600" />}
-            colorClass="bg-indigo-50"
-            title="Pause Account"
-            subtitle="Hide your profile temporarily"
-            onClick={handlePause}
+            icon={<PauseCircle className={`w-5 h-5 ${isPaused ? "text-green-600" : "text-indigo-600"}`} />}
+            colorClass={isPaused ? "bg-green-50" : "bg-indigo-50"}
+            title={isPaused ? "Unpause Account" : "Pause Account"}
+            subtitle={isPaused ? "Make your profile visible again" : "Hide your profile temporarily"}
+            onClick={handleTogglePause}
+            disabled={loading}
           />
 
           <MenuItem
@@ -127,11 +158,12 @@ export function ExitMenu({ isOpen, onClose, onLogout }) {
 }
 
 // --- Helper Component ---
-function MenuItem({ icon, colorClass, title, subtitle, onClick }) {
+function MenuItem({ icon, colorClass, title, subtitle, onClick, disabled }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-all group text-left border border-transparent hover:border-slate-100"
+      disabled={disabled}
+      className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-all group text-left border border-transparent hover:border-slate-100 disabled:opacity-50 disabled:pointer-events-none"
     >
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${colorClass} group-hover:scale-105 transition-transform`}>
         {icon}

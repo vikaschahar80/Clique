@@ -557,7 +557,10 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
     const users = await prisma.user.findMany({
       where: { 
         id: { notIn: excludedIdsArray }, 
-        profile: { isNot: null } 
+        profile: { 
+          isNot: null,
+          isPaused: false
+        } 
       },
       include: { profile: true, preferences: true },
     });
@@ -682,6 +685,7 @@ app.get('/api/profiles/nearby', verifyToken, async (req, res, next) => {
         id: { not: userId },
         profile: {
           isNot: null,
+          isPaused: false,
           NOT: [{ latitude: null }, { longitude: null }]
         }
       },
@@ -890,9 +894,19 @@ app.get('/api/profile/me', verifyToken, async (req, res, next) => {
         preferences: user.preferences
       }
     });
-  } catch (error) {
-    next(error);
-  }
+app.post('/api/profile/toggle-pause', verifyToken, async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.userId);
+    const profile = await prisma.userProfile.findUnique({ where: { userId } });
+    if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
+
+    const updatedProfile = await prisma.userProfile.update({
+      where: { userId },
+      data: { isPaused: !profile.isPaused }
+    });
+
+    res.json({ success: true, isPaused: updatedProfile.isPaused });
+  } catch (error) { next(error); }
 });
 
 

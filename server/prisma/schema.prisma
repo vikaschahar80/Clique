@@ -50,6 +50,7 @@ model UserProfile {
   isFaceVerified             Boolean             @default(false)
   isIdVerified               Boolean             @default(false)
   isWorkVerified             Boolean             @default(false)
+  isPaused                   Boolean             @default(false)
   collegeEmail               String?
   workEmail                  String?
   isCollegeEmailVerified     Boolean             @default(false)
