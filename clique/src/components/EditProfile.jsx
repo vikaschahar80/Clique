@@ -680,20 +680,27 @@ export function EditProfile() {
                   <div className="space-y-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                     <Label className="text-slate-700 font-semibold block">Interested In</Label>
                     <div className="flex gap-3">
-                      {['men', 'women', 'everyone'].map(g => (
-                        <Badge 
-                          key={g} 
-                          variant={preferences.interestedInGender.includes(g) ? "default" : "outline"} 
-                          className={`cursor-pointer px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 ${
-                            preferences.interestedInGender.includes(g) 
-                              ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-transparent shadow-md" 
-                              : "bg-white text-slate-600 border-slate-200 hover:border-cyan-300 hover:text-cyan-700"
-                          }`} 
-                          onClick={() => toggleArrayItem(v => updatePreferences('interestedInGender', v), preferences.interestedInGender, g)}
-                        >
-                          {g.toUpperCase()}
-                        </Badge>
-                      ))}
+                      {[
+                        { value: 'men', label: 'Men' },
+                        { value: 'women', label: 'Women' },
+                        { value: 'everyone', label: 'Both' }
+                      ].map(option => {
+                        const isSelected = preferences.interestedInGender.includes(option.value);
+                        return (
+                          <Badge 
+                            key={option.value} 
+                            variant={isSelected ? "default" : "outline"} 
+                            className={`cursor-pointer px-5 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 ${
+                              isSelected 
+                                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-transparent shadow-md" 
+                                : "bg-white text-slate-600 border-slate-200 hover:border-cyan-300 hover:text-cyan-700"
+                            }`} 
+                            onClick={() => updatePreferences('interestedInGender', [option.value])}
+                          >
+                            {option.label}
+                          </Badge>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">

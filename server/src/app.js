@@ -559,10 +559,60 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
         id: { notIn: excludedIdsArray }, 
         profile: { isNot: null } 
       },
-      include: { profile: true },
+      include: { profile: true, preferences: true },
     });
 
-    const mappedProfiles = users.map(u => {
+    // 1. Gender preference filtering
+    const interestedIn = currentUser?.preferences?.interestedInGender || [];
+    const myGender = currentUser?.profile?.gender || '';
+
+    // Genders we are interested in seeing
+    const targetGenders = [];
+    if (interestedIn.includes('men')) targetGenders.push('male');
+    if (interestedIn.includes('women')) targetGenders.push('female');
+    if (interestedIn.includes('everyone')) {
+      targetGenders.push('male', 'female', 'non-binary', 'other');
+    }
+
+    // Interest values the other user must have to be interested in us
+    const targetInterestsForOther = ['everyone'];
+    if (myGender === 'male') {
+      targetInterestsForOther.push('men');
+    } else if (myGender === 'female') {
+      targetInterestsForOther.push('women');
+    } else if (myGender) {
+      targetInterestsForOther.push('everyone');
+    }
+
+    let filteredUsers = users;
+    
+    // Only perform gender filtering if targetGenders or targetInterestsForOther is populated
+    if (targetGenders.length > 0) {
+      filteredUsers = filteredUsers.filter(u => {
+        const otherGender = u.profile?.gender;
+        const otherInterests = u.preferences?.interestedInGender || [];
+
+        // Does other user's gender match our interest?
+        const weAreInterested = targetGenders.includes(otherGender);
+
+        // Does the other user's preference match our gender?
+        const theyAreInterested = targetInterestsForOther.some(interest => otherInterests.includes(interest));
+
+        return weAreInterested && theyAreInterested;
+      });
+    }
+
+    // 2. Strict distance filtering
+    if (myLat !== null && myLon !== null && maxDistance) {
+      filteredUsers = filteredUsers.filter(u => {
+        const p = u.profile;
+        if (!p || p.latitude === null || p.longitude === null) return true; // keep if location is unknown
+        const distance = getDistance(myLat, myLon, p.latitude, p.longitude);
+        return distance !== Infinity && distance <= maxDistance;
+      });
+    }
+
+    const mappedProfiles = filteredUsers.map(u => {
       const p = u.profile;
       const prompts = [];
       if (p.prompt1Question && p.prompt1Answer) prompts.push({ question: p.prompt1Question.replace(/_/g, ' '), answer: p.prompt1Answer });

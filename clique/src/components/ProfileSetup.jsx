@@ -634,16 +634,23 @@ export function ProfileSetup({ user, onComplete }) {
           <div className="space-y-2">
             <Label>Interested In (Gender) *</Label>
             <div className="flex flex-wrap gap-3">
-              {['men', 'women', 'everyone'].map(g => (
-                <Badge
-                  key={g}
-                  variant={preferences.interestedInGender.includes(g) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleArrayItem(v => updatePreferences('interestedInGender', v), preferences.interestedInGender, g)}
-                >
-                  {g.toUpperCase()}
-                </Badge>
-              ))}
+              {[
+                { value: 'men', label: 'Men' },
+                { value: 'women', label: 'Women' },
+                { value: 'everyone', label: 'Both' }
+              ].map(option => {
+                const isSelected = preferences.interestedInGender.includes(option.value);
+                return (
+                  <Badge 
+                    key={option.value} 
+                    variant={isSelected ? "default" : "outline"} 
+                    className="cursor-pointer"
+                    onClick={() => updatePreferences('interestedInGender', [option.value])}
+                  >
+                    {option.label}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
