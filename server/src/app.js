@@ -602,14 +602,20 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
       });
     }
 
-    // 2. Strict distance filtering
+    // 2. Distance filtering (non-dealbreaker)
     if (myLat !== null && myLon !== null && maxDistance) {
-      filteredUsers = filteredUsers.filter(u => {
+      const withinDistanceUsers = filteredUsers.filter(u => {
         const p = u.profile;
         if (!p || p.latitude === null || p.longitude === null) return true; // keep if location is unknown
         const distance = getDistance(myLat, myLon, p.latitude, p.longitude);
         return distance !== Infinity && distance <= maxDistance;
       });
+
+      // If we have profiles within the distance limit, show only those.
+      // Otherwise, keep the original list (showing outside profiles too).
+      if (withinDistanceUsers.length > 0) {
+        filteredUsers = withinDistanceUsers;
+      }
     }
 
     const mappedProfiles = filteredUsers.map(u => {
