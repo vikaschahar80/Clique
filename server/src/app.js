@@ -1008,6 +1008,38 @@ app.post('/api/chats/:chatId/messages', verifyToken, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
+app.post('/api/chats/:chatId/unmatch', verifyToken, async (req, res, next) => {
+  try {
+    const userId = parseInt(req.user.userId);
+    const { chatId } = req.params;
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) return res.status(404).json({ success: false, message: 'Chat not found' });
+
+    if (!chat.participants.includes(userId)) {
+      return res.status(403).json({ success: false, message: 'You are not a participant in this chat' });
+    }
+
+    const otherParticipantId = chat.participants.find(p => p !== userId);
+
+    // Delete connection documents between these two users
+    await Connection.deleteMany({
+      $or: [
+        { senderId: userId, receiverId: otherParticipantId },
+        { senderId: otherParticipantId, receiverId: userId }
+      ]
+    });
+
+    // Delete messages in this chat
+    await Message.deleteMany({ chatId });
+
+    // Delete the chat itself
+    await Chat.findByIdAndDelete(chatId);
+
+    res.json({ success: true, message: 'Unmatched successfully' });
+  } catch (error) { next(error); }
+});
+
 app.get('/api/protected', verifyToken, (req, res, next) => {
   res.json({ success: true, message: `Welcome back, user ${req.user.userId}!` });
 });

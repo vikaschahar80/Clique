@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, MoreVertical, Video, Phone, PhoneOff } from 'lucide-react';
+import { Send, MoreVertical, Video, Phone, PhoneOff, UserX } from 'lucide-react';
 import api from '../../lib/axios';
 import { io } from 'socket.io-client';
 
@@ -15,11 +15,16 @@ if (isVercel) {
 }
 let socket, selectedChatCompare;
 
-export default function ChatWindow({ selectedMatch, user }) {
+export default function ChatWindow({ selectedMatch, user, onUnmatch }) {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [socketConnected, setSocketConnected] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Unmatch & Dropdown States
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const dropdownRef = useRef(null);
 
   // WebRTC States
   const [stream, setStream] = useState(null);
@@ -36,6 +41,33 @@ export default function ChatWindow({ selectedMatch, user }) {
   const connectionRef = useRef(null);
 
   const peerConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+  // Handle click outside dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const confirmUnmatch = async () => {
+    try {
+      const { data } = await api.post(`/api/chats/${selectedMatch._id}/unmatch`);
+      if (data.success) {
+        setShowConfirmModal(false);
+        setShowDropdown(false);
+        if (onUnmatch) {
+          onUnmatch(selectedMatch._id);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to unmatch user", error);
+      alert("Failed to unmatch. Please try again.");
+    }
+  };
 
   useEffect(() => {
     socket = io(ENDPOINT);
@@ -226,6 +258,35 @@ export default function ChatWindow({ selectedMatch, user }) {
 
   return (
     <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col relative">
+      {/* Unmatch Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-gray-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+            <div className="size-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-4">
+              <UserX className="size-6" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-950 mb-2">Unmatch with {selectedMatch.user.name}?</h3>
+            <p className="text-sm text-gray-500 mb-6 font-normal">
+              This will permanently delete your chat and message history. You won't be able to contact them again.
+            </p>
+            <div className="flex w-full gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-2.5 px-4 border border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmUnmatch}
+                className="flex-1 py-2.5 px-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Unmatch
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Call UI Overlay */}
       {(isCalling || callAccepted || receivingCall) && !callEnded && (
         <div className="absolute inset-0 bg-gray-900 z-50 flex flex-col items-center justify-center p-4">
@@ -314,9 +375,28 @@ export default function ChatWindow({ selectedMatch, user }) {
           <button onClick={callUser} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <Video className="size-5 text-gray-600" />
           </button>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <MoreVertical className="size-5 text-gray-600" />
-          </button>
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              onClick={() => setShowDropdown(!showDropdown)} 
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <MoreVertical className="size-5 text-gray-600" />
+            </button>
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <button
+                  onClick={() => {
+                    setShowConfirmModal(true);
+                    setShowDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 font-medium"
+                >
+                  <UserX className="size-4" />
+                  Unmatch User
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

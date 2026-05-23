@@ -32,6 +32,16 @@ const MyChats = () => {
     }
   };
 
+  const handleUnmatch = (chatId) => {
+    const updatedChats = chats.filter((chat) => chat._id !== chatId);
+    setChats(updatedChats);
+    if (updatedChats.length > 0) {
+      setSelectedMatch(updatedChats[0]);
+    } else {
+      setSelectedMatch(null);
+    }
+  };
+
   const filteredMatches = chats.filter((chat) =>
     chat.user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -97,7 +107,7 @@ const MyChats = () => {
       </div>
 
       {/* Chat Window Component */}
-      <ChatWindow selectedMatch={selectedMatch} user={user} />
+      <ChatWindow selectedMatch={selectedMatch} user={user} onUnmatch={handleUnmatch} />
     </div>
   )
 }
