@@ -545,7 +545,7 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
     const myConnections = await Connection.find({
       $or: [
         { senderId: userId },
-        { receiverId: userId, status: 'matched' }
+        { receiverId: userId, status: { $in: ['matched', 'rejected'] } }
       ]
     });
 
@@ -1077,12 +1077,14 @@ app.post('/api/chats/:chatId/unmatch', verifyToken, async (req, res, next) => {
 
     const otherParticipantId = chat.participants.find(p => p !== userId);
 
-    // Delete connection documents between these two users
-    await Connection.deleteMany({
+    // Mark connection status as 'rejected' between these two users so they are excluded permanently from dashboards
+    await Connection.updateMany({
       $or: [
         { senderId: userId, receiverId: otherParticipantId },
         { senderId: otherParticipantId, receiverId: userId }
       ]
+    }, {
+      status: 'rejected'
     });
 
     // Delete messages in this chat
