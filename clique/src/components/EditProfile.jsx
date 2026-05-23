@@ -716,7 +716,9 @@ export function EditProfile() {
                   <div className="space-y-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="flex justify-between items-center">
                       <Label className="text-slate-700 font-semibold">Maximum Distance</Label>
-                      <span className="bg-cyan-100 text-cyan-800 text-xs font-bold px-3 py-1 rounded-full">{preferences.maxDistance} km</span>
+                      <span className="bg-cyan-100 text-cyan-800 text-xs font-bold px-3 py-1 rounded-full">
+                        {parseInt(preferences.maxDistance) >= 100 ? "100+ km (Open to everyone)" : `${preferences.maxDistance} km`}
+                      </span>
                     </div>
                     <input 
                       type="range" 

@@ -664,7 +664,7 @@ export function ProfileSetup({ user, onComplete }) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Max Distance: {preferences.maxDistance} km</Label>
+            <Label>Max Distance: {parseInt(preferences.maxDistance) >= 100 ? "100+ km (Open to everyone)" : `${preferences.maxDistance} km`}</Label>
             <input type="range" min="5" max="100" value={preferences.maxDistance} onChange={e => updatePreferences('maxDistance', e.target.value)} className="w-full" />
           </div>
           <div className="space-y-2">

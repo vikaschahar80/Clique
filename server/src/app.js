@@ -568,9 +568,9 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
 
     // Genders we are interested in seeing
     const targetGenders = [];
-    if (interestedIn.includes('men')) targetGenders.push('male');
-    if (interestedIn.includes('women')) targetGenders.push('female');
-    if (interestedIn.includes('everyone')) {
+    if (interestedIn.includes('men') || interestedIn.length === 0) targetGenders.push('male');
+    if (interestedIn.includes('women') || interestedIn.length === 0) targetGenders.push('female');
+    if (interestedIn.includes('everyone') || interestedIn.length === 0) {
       targetGenders.push('male', 'female', 'non-binary', 'other');
     }
 
@@ -590,7 +590,12 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
     if (targetGenders.length > 0) {
       filteredUsers = filteredUsers.filter(u => {
         const otherGender = u.profile?.gender;
-        const otherInterests = u.preferences?.interestedInGender || [];
+        let otherInterests = u.preferences?.interestedInGender || [];
+
+        // FALLBACK: If other user has no preferences set in database, assume they are open to all
+        if (otherInterests.length === 0) {
+          otherInterests = ['everyone', 'men', 'women'];
+        }
 
         // Does other user's gender match our interest?
         const weAreInterested = targetGenders.includes(otherGender);
@@ -603,7 +608,8 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
     }
 
     // 2. Distance filtering (non-dealbreaker)
-    if (myLat !== null && myLon !== null && maxDistance) {
+    // Only filter strictly if maxDistance is less than 100. (100 means 100+ which is open to everyone)
+    if (myLat !== null && myLon !== null && maxDistance && maxDistance < 100) {
       const withinDistanceUsers = filteredUsers.filter(u => {
         const p = u.profile;
         if (!p || p.latitude === null || p.longitude === null) return true; // keep if location is unknown
@@ -651,13 +657,6 @@ app.get('/api/profiles', verifyToken, async (req, res, next) => {
     mappedProfiles.sort((a, b) => {
       const aDist = a.distance === null ? Infinity : a.distance;
       const bDist = b.distance === null ? Infinity : b.distance;
-      
-      const aIsWithin = aDist <= maxDistance;
-      const bIsWithin = bDist <= maxDistance;
-      
-      if (aIsWithin && !bIsWithin) return -1;
-      if (!aIsWithin && bIsWithin) return 1;
-      
       return aDist - bDist;
     });
 
