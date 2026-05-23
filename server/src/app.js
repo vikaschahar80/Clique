@@ -894,6 +894,11 @@ app.get('/api/profile/me', verifyToken, async (req, res, next) => {
         preferences: user.preferences
       }
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post('/api/profile/toggle-pause', verifyToken, async (req, res, next) => {
   try {
     const userId = parseInt(req.user.userId);
